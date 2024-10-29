@@ -1,6 +1,9 @@
+// main.dart
 import 'package:flutter/material.dart';
-
-/// Flutter code sample for MainApp
+import 'pages/home_page.dart';
+import 'pages/games_page.dart';
+import 'pages/stats_page.dart';
+import 'pages/settings_page.dart';
 
 void main() => runApp(const MainApp());
 
@@ -28,8 +31,17 @@ class _NavigationState extends State<Navigation> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('M2M Skeleton App'),
+        backgroundColor: Colors.blue,
+      ),
+      body: <Widget>[
+        const HomePage(),
+        const GamesPage(),
+        const StatsPage(),
+        const SettingsPage(),
+      ][currentPageIndex],
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
           setState(() {
@@ -42,83 +54,24 @@ class _NavigationState extends State<Navigation> {
           NavigationDestination(
             selectedIcon: Icon(Icons.home, color: Colors.black),
             icon: Icon(Icons.home_outlined),
-            label: ('Home'),
+            label: 'Home',
           ),
           NavigationDestination(
-              selectedIcon: Icon(Icons.sports_esports, color: Colors.black),
-              icon: Icon(Icons.sports_esports_outlined),
-              label: 'Games'),
+            selectedIcon: Icon(Icons.sports_esports, color: Colors.black),
+            icon: Icon(Icons.sports_esports_outlined),
+            label: 'Games',
+          ),
           NavigationDestination(
             selectedIcon: Icon(Icons.leaderboard, color: Colors.black),
             icon: Icon(Icons.leaderboard_outlined),
             label: 'Progress',
           ),
           NavigationDestination(
-              selectedIcon: Icon(Icons.leaderboard, color: Colors.black),
-              icon: Icon(Icons.settings),
-              label: 'Settings'),
+            selectedIcon: Icon(Icons.settings, color: Colors.black),
+            icon: Icon(Icons.settings_outlined),
+            label: 'Settings',
+          ),
         ],
-      ),
-      body: <Widget>[
-        /// Home page
-        Card(
-          shadowColor: Colors.transparent,
-          margin: const EdgeInsets.all(0),
-          child: SizedBox.expand(
-            child: Center(
-              child: Text(
-                'Landing Page',
-                style: theme.textTheme.titleLarge,
-              ),
-            ),
-          ),
-        ),
-
-        /// Notifications page
-        Card(
-          shadowColor: Colors.transparent,
-          margin: const EdgeInsets.all(0),
-          child: SizedBox.expand(
-            child: Center(
-              child: Text(
-                'Boot game here',
-                style: theme.textTheme.titleLarge,
-              ),
-            ),
-          ),
-        ),
-
-        /// Messages page
-        Card(
-          shadowColor: Colors.transparent,
-          margin: const EdgeInsets.all(0),
-          child: SizedBox.expand(
-            child: Center(
-              child: Text(
-                'Display stats here',
-                style: theme.textTheme.titleLarge,
-              ),
-            ),
-          ),
-        ),
-
-        //Settings Page
-        Card(
-          shadowColor: Colors.transparent,
-          margin: const EdgeInsets.all(0),
-          child: SizedBox.expand(
-            child: Center(
-              child: Text(
-                'Display Settings Here',
-                style: theme.textTheme.titleLarge,
-              ),
-            ),
-          ),
-        ),
-      ][currentPageIndex],
-      appBar: AppBar(
-        title: const Text('M2M Skeleton App'),
-        backgroundColor: Colors.blue,
       ),
     );
   }
