@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   badges: ^2.0.3
+  local_auth: ^2.3.0
 
 dev_dependencies:
   flutter_test:

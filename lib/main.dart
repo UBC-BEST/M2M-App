@@ -37,7 +37,8 @@ class _NavigationState extends State<Navigation> {
         backgroundColor: Colors.blue,
       ),
       body: <Widget>[
-        const HomePage(),
+        // const HomePage(),
+        const HomePageAuth(),
         const GamesPage(),
         const StatsPage(),
         const SettingsPage(),
