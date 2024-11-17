@@ -10,7 +10,6 @@ class IntroPage3 extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Top Left Skip Button
           SafeArea(
             child: Align(
               alignment: Alignment.topLeft,

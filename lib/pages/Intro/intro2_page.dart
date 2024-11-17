@@ -5,19 +5,19 @@ import '../Login/login_page.dart';
 
 class IntroPage2 extends StatelessWidget {
   const IntroPage2({super.key});
-
+  // All of Intro Pages 1-3 contain the exact same code
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Top Left Skip Button
-          // Wrap both buttons with SafeArea to avoid notches
+          // Wrap both button with SafeArea to avoid notches
           SafeArea(
             child: Align(
               alignment: Alignment.topLeft,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
+                // Top Left Skip Button
                 child: TextButton(
                   style: TextButton.styleFrom(foregroundColor: Colors.blue),
                   onPressed: () {
@@ -28,9 +28,8 @@ class IntroPage2 extends StatelessWidget {
                             const IntroPage1(),
                         transitionsBuilder:
                             (context, animation, secondaryAnimation, child) {
-                          // Define custom slide transition
-                          const begin =
-                              Offset(-1.0, 0.0); // Start from the right
+                          // Custom slide transition for when the user wants to go back
+                          const begin = Offset(-1.0, 0.0);
                           const end = Offset.zero;
                           const curve = Curves.ease;
 
@@ -50,11 +49,13 @@ class IntroPage2 extends StatelessWidget {
               ),
             ),
           ),
+          // Wrap both button with SafeArea to avoid notches or hole punches
           SafeArea(
             child: Align(
               alignment: Alignment.topRight,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
+                // Top Right Text Button
                 child: TextButton(
                   style: TextButton.styleFrom(foregroundColor: Colors.blue),
                   onPressed: () {
@@ -70,7 +71,8 @@ class IntroPage2 extends StatelessWidget {
               ),
             ),
           ),
-          // Centered Content
+
+          // Centered Content (text and title pretty much)
           Center(
             child: SingleChildScrollView(
               child: SizedBox(

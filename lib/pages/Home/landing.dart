@@ -50,7 +50,7 @@ class Landing extends State<Navigation> {
           NavigationDestination(
             selectedIcon: Icon(Icons.leaderboard, color: Colors.black),
             icon: Icon(Icons.leaderboard_outlined),
-            label: 'Progress',
+            label: 'Data',
           ),
           NavigationDestination(
             selectedIcon: Icon(Icons.settings, color: Colors.black),

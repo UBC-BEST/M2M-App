@@ -27,8 +27,6 @@ class MainApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSwatch().copyWith(primary: Colors.blue),
       ),
       home: const NavigationScreen(),
-      // theme: ThemeData(useMaterial3: true),
-      // home: const Navigation(),
     );
   }
 }
