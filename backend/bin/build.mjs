@@ -6,7 +6,7 @@ buildSync({
   sourcemap: true,
   treeShaking: true,
   minify: false,
-  outfile: "dist/bundle.js",
+  outfile: "dist/bundle.mjs",
   target: "esnext",
   platform: "node",
   packages: "external",
