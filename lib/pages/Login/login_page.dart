@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:m2mapp/pages/Home/Landing.dart';
 import 'package:m2mapp/pages/Intro/training_selection.dart';
 import 'package:m2mapp/pages/SignUp/sign_up_page.dart';
 
