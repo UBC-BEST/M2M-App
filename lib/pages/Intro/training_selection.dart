@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Home/Landing.dart';
+import '../Home/Navigation.dart';
 
 class TrainingSelectionPage extends StatefulWidget {
   const TrainingSelectionPage({super.key});
