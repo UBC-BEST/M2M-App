@@ -1,7 +1,7 @@
 // main.dart
 import 'package:flutter/material.dart';
 
-import 'pages/Intro/intro1_page.dart';
+import 'pages/Intro/intro_pages.dart';
 
 void main() => runApp(const MainApp());
 
@@ -38,7 +38,7 @@ class NavigationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
-        child: IntroPage1(),
+        child: IntroPages(),
       ),
     );
   }
