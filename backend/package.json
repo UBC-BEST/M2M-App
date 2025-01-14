@@ -4,14 +4,16 @@
   "description": "Express server for the M2M project",
   "main": "src/app.ts",
   "scripts": {
-    "start": "node bin/build.mjs && node dist/bundle.mjs",
+    "start": "node scripts/build.mjs && node dist/bundle.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "argon2": "^0.41.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "env-var": "^7.5.0",
     "express": "^4.21.1",
+    "luxon": "^3.5.0",
     "mongodb": "^6.10.0"
   },
   "devDependencies": {
@@ -20,6 +22,7 @@
     "@types/cors": "~2.8.17",
     "@types/eslint-config-prettier": "~6.11.3",
     "@types/express": "~5.0.0",
+    "@types/luxon": "^3",
     "esbuild": "^0.24.0",
     "eslint": "^9.15.0",
     "eslint-config-prettier": "^9.1.0",

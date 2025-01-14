@@ -6,13 +6,15 @@ import { userRouter } from './routes/user'
 
 // ----- SERVER AND DATABASE SETUP -----
 
-export const mongoClient = new MongoClient(env.MONGODB_CONNECTION_URI, {
+const mongo = new MongoClient(env.MONGODB_CONNECTION_URI, {
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
   },
 })
+
+export const db = mongo.db(env.DB_NAME)
 
 export const app = express()
   .use(cors()) // Enable cross-origin requests for all clients
@@ -32,22 +34,20 @@ app.get('/', (req, res) => {
 app.listen(env.PORT, () => {
   console.log(`Server running at ${env.HOST}:${env.PORT}`)
   // Send a ping to confirm a successful connection
-  mongoClient
-    .db('admin')
-    .command({ ping: 1 })
-    .then(() => console.log('Successfully connected to MongoDB!'))
+  db.command({ ping: 1 }).then(
+    () => console.log(`Successfully connected to database '${env.DB_NAME}'`),
+    err => console.log('MONGODB CONNECTION ERROR', err)
+  )
 })
 
 // Errors (error handlers always have 4 arguments, it's an express thing)
 // eslint-disable-next-line no-unused-vars
 app.use(function (err, req, res, next) {
   console.error(err.message)
-  res.status(err.status || 500).json({
-    error: err.message || 'Internal Server Error',
-  })
+  res.status(err.status || 500).send(err.message || 'Internal Server Error')
 } as ErrorRequestHandler)
 
 // Termination
 process.on('exit', () => {
-  void mongoClient.close()
+  void mongo.close()
 })
