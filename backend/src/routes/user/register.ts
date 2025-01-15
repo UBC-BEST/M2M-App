@@ -19,6 +19,7 @@ export const register: RequestHandler = async (req, res): Promise<any> => {
     return res.status(409).send('Duplicate email')
   }
 
+  // One-way hash ensures password can be verified but not decrypted
   const pwHash = await argon2.hash(password)
   const uuid = randomBytes(12).toString('hex')
 

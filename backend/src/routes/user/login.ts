@@ -13,17 +13,19 @@ export const login: RequestHandler = async (req, res): Promise<any> => {
 
   const users = db.collection('users')
 
-  // Verify existence of user
+  // Check existence of user in database
   const user = await users.findOne({ email })
   if (!user) {
     return res.status(401).send('No account associated with this email')
   }
 
+  // Verify input against password hash
   const pwMatch = await argon2.verify(user.pwHash, password)
   if (!pwMatch) {
     return res.status(401).send('Email and password do not match')
   }
 
+  // Generate a JSON Web Token for this session
   const payload = { user: user._id }
   const token = jwt.sign(payload, env.JWT_SECRET, { expiresIn: '1h' })
 

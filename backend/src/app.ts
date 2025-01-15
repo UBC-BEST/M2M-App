@@ -4,7 +4,7 @@ import express, { ErrorRequestHandler } from 'express'
 import { MongoClient, ServerApiVersion } from 'mongodb'
 import { userRouter } from './routes/user'
 
-// ----- SERVER AND DATABASE SETUP -----
+// ----- DATABASE AND SERVER SETUP -----
 
 export const mongo = new MongoClient(env.MONGODB_CONNECTION_URI, {
   serverApi: {
