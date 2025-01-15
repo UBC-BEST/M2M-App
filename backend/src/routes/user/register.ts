@@ -1,9 +1,9 @@
 import { RequestHandler } from 'express'
 import { db } from '../../app'
 import argon2 from 'argon2'
-import { generateBase58Id } from '../../utils/helpers'
 import { ObjectId } from 'mongodb'
 import { DateTime } from 'luxon'
+import { randomBytes } from 'node:crypto'
 
 export const register: RequestHandler = async (req, res): Promise<any> => {
   const { email, displayName, password } = req.body
@@ -20,7 +20,7 @@ export const register: RequestHandler = async (req, res): Promise<any> => {
   }
 
   const pwHash = await argon2.hash(password)
-  const uuid = generateBase58Id(16)
+  const uuid = randomBytes(12).toString('hex')
 
   // Add the new user to the database
   await users.insertOne({

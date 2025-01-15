@@ -6,7 +6,7 @@ import { userRouter } from './routes/user'
 
 // ----- SERVER AND DATABASE SETUP -----
 
-const mongo = new MongoClient(env.MONGODB_CONNECTION_URI, {
+export const mongo = new MongoClient(env.MONGODB_CONNECTION_URI, {
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
@@ -30,14 +30,9 @@ app.get('/', (req, res) => {
 
 // ----- LIFECYCLE HANDLERS -----
 
-// Startup
-app.listen(env.PORT, () => {
-  console.log(`Server running at ${env.HOST}:${env.PORT}`)
-  // Send a ping to confirm a successful connection
-  db.command({ ping: 1 }).then(
-    () => console.log(`Successfully connected to database '${env.DB_NAME}'`),
-    err => console.log('MONGODB CONNECTION ERROR', err)
-  )
+// Start server
+export const server = app.listen(env.PORT, () => {
+  console.debug(`Server running at ${env.HOST}:${env.PORT}`)
 })
 
 // Errors (error handlers always have 4 arguments, it's an express thing)
@@ -48,6 +43,8 @@ app.use(function (err, req, res, next) {
 } as ErrorRequestHandler)
 
 // Termination
-process.on('exit', () => {
-  void mongo.close()
-})
+export const exit = async () => {
+  server.close()
+  await mongo.close()
+}
+process.on('exit', exit)
