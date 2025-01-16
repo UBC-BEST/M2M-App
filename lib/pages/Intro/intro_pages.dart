@@ -34,63 +34,114 @@ class _IntroPagesState extends State<IntroPages> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // PageView to hold multiple intro pages
-          PageView(
-            controller: _pageController,
-            onPageChanged: (index) {
-              setState(() {
-                _currentPage = index; // Update the current page index
-              });
-            },
+  // Helper method to build a page
+  Widget _buildPage({
+    required String photoUrl,
+    required String title,
+    required String description,
+  }) {
+    return Column(
+      children: [
+        // Use Expanded to center content vertically
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildPage(
-                title: 'Complete exercises',
-                description:
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus congue suscipit mollis. Vivamus eros purus.',
+              // Photo
+              Image.asset(
+                photoUrl,
+                height: 200,
+                fit: BoxFit.contain,
+                errorBuilder: (BuildContext context, Object exception,
+                    StackTrace? stackTrace) {
+                  return const Icon(
+                    Icons.broken_image,
+                    size: 100,
+                    color: Colors.grey,
+                  );
+                },
               ),
-              _buildPage(
-                title: 'Play interactive games',
-                description:
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus congue suscipit mollis. Vivamus eros purus.',
+              const SizedBox(height: 20), // Reduced spacing
+              // Title
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24, // Increased font size for better visibility
+                ),
+                textAlign: TextAlign.center,
               ),
-              _buildPage(
-                title: 'Track your progress',
-                description:
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus congue suscipit mollis. Vivamus eros purus.',
+              const SizedBox(height: 10), // Reduced spacing
+              // Description
+              Text(
+                description,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16, color: Colors.black54),
               ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          // Expanded PageView
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentPage = index; // Update the current page index
+                });
+              },
+              children: [
+                _buildPage(
+                  photoUrl: 'assets/hand_pinch.png',
+                  title: 'Complete Exercises',
+                  description:
+                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus congue suscipit mollis. Vivamus eros purus.',
+                ),
+                _buildPage(
+                  photoUrl: 'assets/hand_balloon.png',
+                  title: 'Play Interactive Games',
+                  description:
+                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus congue suscipit mollis. Vivamus eros purus.',
+                ),
+                _buildPage(
+                  photoUrl: 'assets/hand_phone.png',
+                  title: 'Track Your Progress',
+                  description:
+                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus congue suscipit mollis. Vivamus eros purus.',
+                ),
+              ],
+            ),
+          ),
 
           // SmoothPageIndicator
-          Positioned(
-            bottom: 150, // Lowered the position of the SmoothPageIndicator
-            left: 0,
-            right: 0,
-            child: Center(
-              child: SmoothPageIndicator(
-                controller: _pageController,
-                count: 3,
-                effect: ExpandingDotsEffect(
-                  dotHeight: 9,
-                  dotWidth: 9,
-                  spacing: 8,
-                  dotColor: Colors.grey,
-                  activeDotColor: Colors.grey.shade700,
-                ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20.0),
+            child: SmoothPageIndicator(
+              controller: _pageController,
+              count: 3,
+              effect: ExpandingDotsEffect(
+                dotHeight: 10,
+                dotWidth: 10,
+                spacing: 8,
+                dotColor: Colors.grey,
+                activeDotColor: Colors.grey.shade700,
               ),
             ),
           ),
 
           // "Next" or "Get Started" Button
-          Positioned(
-            bottom: 60,
-            left: 16,
-            right: 16,
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
             child: ElevatedButton(
               onPressed: () {
                 if (_currentPage < 2) {
@@ -110,46 +161,21 @@ class _IntroPagesState extends State<IntroPages> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue.shade600,
                 minimumSize: const Size(double.infinity, 48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
               ),
               child: Text(
-                style: const TextStyle(color: Colors.white),
-                _currentPage == 2
-                    ? 'Get Started'
-                    : 'Next', // Change text dynamically
+                _currentPage == 2 ? 'Get Started' : 'Next',
+                style: const TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
           ),
+          const SizedBox(
+            height: 30,
+          )
         ],
       ),
-    );
-  }
-
-  // Helper method to build a page
-  Widget _buildPage({required String title, required String description}) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // Add some spacing above the text
-        const Spacer(flex: 3),
-        Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
-        const SizedBox(height: 15),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 35.0),
-          child: Text(
-            description,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 15),
-          ),
-        ),
-        // Add more spacing to push everything down
-        const SizedBox(height: 250),
-      ],
     );
   }
 }

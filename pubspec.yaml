@@ -21,3 +21,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/hand_pinch.png
+    - assets/hand_balloon.png
+    - assets/hand_phone.png
+    - assets/login.png

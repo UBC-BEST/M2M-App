@@ -11,11 +11,11 @@ class TrainingSelectionPage extends StatefulWidget {
 class _TrainingSelectionPageState extends State<TrainingSelectionPage> {
   final List<int> selectedBoxes = [];
   final List<String> boxLabel = [
-    'Cardio',
-    'Strength Training',
-    'Flexibility',
-    'Balance',
-    'Endurance',
+    'Range of Motion',
+    'Accuracy',
+    'Movement Accuracy',
+    'Grip Strength',
+    'Range of Motion',
     'Movement Accuracy',
   ];
 
@@ -37,12 +37,12 @@ class _TrainingSelectionPageState extends State<TrainingSelectionPage> {
     );
   }
 
-  // Method to generate a pastel color by blending with white
+  // Method to generate a pastel color by blending with white (creating 6x6 box colours)
   Color _getPastelColor(Color color) {
     return Color.lerp(color, Colors.white, 0.5)!;
   }
 
-  // Method to generate a brighter color by blending with white
+  // Method to generate a brighter color by blending with white (to indicated that an item is selected)
   Color _getBrighterColor(Color color) {
     return Color.lerp(
         color, Colors.white, 0.3)!; // Blend slightly with white to brighten
