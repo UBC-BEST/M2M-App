@@ -12,7 +12,7 @@ migrate_working_dir/
 .vscode/
 
 # Ignores UnityLibrary
-ios/UnityLibrary
+frontend/ios/UnityLibrary
 
 # IntelliJ related
 *.iml
