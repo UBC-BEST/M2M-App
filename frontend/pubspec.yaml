@@ -11,6 +11,7 @@ dependencies:
     sdk: flutter
   badges: ^2.0.3
   local_auth: ^2.3.0
+  flutter_unity_widget: ^2022.2.0
 
 dev_dependencies:
   flutter_test:
