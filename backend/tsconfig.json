@@ -1,0 +1,14 @@
+{
+  "extends": "@tsconfig/recommended/tsconfig.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "target": "ESNext",
+    "sourceMap": true,
+    "allowJs": false,
+    "resolveJsonModule": true,
+    "outDir": "./dist",
+    "baseUrl": "."
+  },
+  "include": ["src"]
+}
