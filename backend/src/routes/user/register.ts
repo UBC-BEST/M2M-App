@@ -1,9 +1,9 @@
 import { RequestHandler } from 'express'
-import { db } from '../../app'
 import argon2 from 'argon2'
 import { ObjectId } from 'mongodb'
 import { DateTime } from 'luxon'
 import { randomBytes } from 'node:crypto'
+import { db } from '../../utils/database'
 
 export const register: RequestHandler = async (req, res): Promise<any> => {
   const { email, displayName, password } = req.body

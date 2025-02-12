@@ -1,5 +1,6 @@
 import supertest = require('supertest')
-import { server, db, exit } from '../src/app'
+import { server, exit } from '../src/app'
+import { db } from '../src/utils/database'
 
 describe('/user', () => {
   const testEmail = 'test@example.com'
