@@ -10,3 +10,4 @@ export const mongo = new MongoClient(MONGODB_CONNECTION_URI, {
 })
 
 export const db = mongo.db(DB_NAME)
+export const dbUsers = db.collection('users')

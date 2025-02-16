@@ -1,12 +1,12 @@
 import supertest = require('supertest')
-import { server, exit } from '../src/app'
-import { db } from '../src/utils/database'
+import { db, dbUsers, mongo } from '../src/utils/database'
+import { HOST, PORT } from '../src/utils/env'
 
 describe('/user', () => {
   const testEmail = 'test@example.com'
   const testName = 'Test Account'
   const testPw = 'Test_123'
-  const agent = supertest(server)
+  const agent = supertest(`${HOST}:${PORT}`)
 
   test('Connect', async () => {
     const ping = async () => await db.command({ ping: 1 })
@@ -21,6 +21,7 @@ describe('/user', () => {
     })
 
     expect(response.status).toBe(201)
+    return expect(dbUsers.findOne({ email: testEmail })).resolves.toBeTruthy()
   })
 
   test('/register FAIL: malformed request', async () => {
@@ -81,7 +82,7 @@ describe('/user', () => {
 
   afterAll(async () => {
     // Remove test user so database returns to same state as before testing
-    await db.collection('users').deleteOne({ email: 'test@example.com' })
-    await exit()
+    await dbUsers.deleteOne({ email: 'test@example.com' })
+    await mongo.close()
   })
 })
