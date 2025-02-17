@@ -1,20 +1,10 @@
-import * as env from './utils/env'
 import cors from 'cors'
 import express, { ErrorRequestHandler } from 'express'
-import { MongoClient, ServerApiVersion } from 'mongodb'
 import { userRouter } from './routes/user'
+import { db, mongo } from './utils/database'
+import { DB_NAME, HOST, PORT } from './utils/env'
 
-// ----- DATABASE AND SERVER SETUP -----
-
-export const mongo = new MongoClient(env.MONGODB_CONNECTION_URI, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-})
-
-export const db = mongo.db(env.DB_NAME)
+// ----- SERVER SETUP -----
 
 export const app = express()
   .use(cors()) // Enable cross-origin requests for all clients
@@ -31,8 +21,16 @@ app.get('/', (req, res) => {
 // ----- LIFECYCLE HANDLERS -----
 
 // Start server
-export const server = app.listen(env.PORT, () => {
-  console.debug(`Server running at ${env.HOST}:${env.PORT}`)
+export const server = app.listen(PORT, () => {
+  console.debug(`Server running at ${HOST}:${PORT}`)
+  // Send a ping to check database status
+  db.command({ ping: 1 }).then(
+    () => console.debug(`Successfully connected to database '${DB_NAME}'`),
+    err => {
+      console.error('MONGODB CONNECTION ERROR', err)
+      process.exitCode = 1 // Terminate on database connect fail
+    }
+  )
 })
 
 // Errors (error handlers always have 4 arguments, it's an express thing)

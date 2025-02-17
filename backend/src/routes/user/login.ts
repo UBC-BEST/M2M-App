@@ -1,8 +1,8 @@
 import { RequestHandler } from 'express'
-import { db } from '../../app'
-import * as env from '../../utils/env'
 import argon2 from 'argon2'
 import jwt from 'jsonwebtoken'
+import { dbUsers } from '../../utils/database'
+import { JWT_SECRET } from '../../utils/env'
 
 export const login: RequestHandler = async (req, res): Promise<any> => {
   const { email, password } = req.body
@@ -11,10 +11,8 @@ export const login: RequestHandler = async (req, res): Promise<any> => {
     return res.status(400).send('Malformed request')
   }
 
-  const users = db.collection('users')
-
   // Check existence of user in database
-  const user = await users.findOne({ email })
+  const user = await dbUsers.findOne({ email })
   if (!user) {
     return res.status(401).send('No account associated with this email')
   }
@@ -27,7 +25,7 @@ export const login: RequestHandler = async (req, res): Promise<any> => {
 
   // Generate a JSON Web Token for this session
   const payload = { user: user._id }
-  const token = jwt.sign(payload, env.JWT_SECRET, { expiresIn: '1h' })
+  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' })
 
   return res.status(200).json({ message: `Login successful`, token })
 }
