@@ -83,6 +83,5 @@ describe('/user', () => {
   afterAll(async () => {
     // Remove test user so database returns to same state as before testing
     await dbUsers.deleteOne({ email: 'test@example.com' })
-    await mongo.close()
   })
 })
