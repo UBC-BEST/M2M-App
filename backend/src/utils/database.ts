@@ -11,6 +11,6 @@ export const mongo = new MongoClient(MONGODB_CONNECTION_URI, {
 
 export const db = mongo.db(DB_NAME)
 export const dbUsers = db.collection('users')
-export const dbSessions = db.collection('sessions')
+export const dbTokens = db.collection('tokens')
 
 process.on('exit', mongo.close)

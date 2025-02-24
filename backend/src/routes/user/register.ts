@@ -31,5 +31,5 @@ export const register: RequestHandler = async (req, res): Promise<any> => {
     verified: false,
   })
 
-  return res.status(201).send(`Registration successful`)
+  return res.status(201).send('Registration successful')
 }
