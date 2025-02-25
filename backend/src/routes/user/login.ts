@@ -1,9 +1,7 @@
 import { RequestHandler } from 'express'
 import argon2 from 'argon2'
-import jwt from 'jsonwebtoken'
-import { dbTokens, dbUsers } from '../../utils/database'
-import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from '../../utils/env'
-import { randomBytes } from 'node:crypto'
+import { dbUsers } from '../../utils/database'
+import { generateAccessToken, generateRefreshToken } from '../../utils/tokens'
 
 export const login: RequestHandler = async (req, res): Promise<any> => {
   const { email, password } = req.body
@@ -24,28 +22,9 @@ export const login: RequestHandler = async (req, res): Promise<any> => {
     return res.status(401).send('Email and password do not match')
   }
 
-  // Generate initial JWT access token for this login
-  const accessPayload = { user: user._id, email }
-  const accessOptions = { expiresIn: '15m' }
-  const accessToken = jwt.sign(
-    accessPayload,
-    ACCESS_TOKEN_SECRET,
-    accessOptions
-  )
-
-  // Generate refresh token
-  const refreshPayload = {
-    user: user._id,
-    token: randomBytes(64).toString('hex'),
-  }
-  const refreshOptions = { expiresIn: '30d' }
-  const refreshToken = jwt.sign(
-    refreshPayload,
-    REFRESH_TOKEN_SECRET,
-    refreshOptions
-  )
-
-  await dbTokens.insertOne({ userId: user._id, token: refreshToken })
+  // Generate access and refresh tokens for the user client
+  const accessToken = generateAccessToken(user._id)
+  const refreshToken = await generateRefreshToken(user._id)
 
   return res.status(200).json({ accessToken, refreshToken })
 }
