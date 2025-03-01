@@ -3,6 +3,7 @@ import express, { ErrorRequestHandler } from 'express'
 import { userRouter } from './routes/user'
 import { db } from './utils/database'
 import { DB_NAME, HOST, PORT } from './utils/env'
+import cookieParser from 'cookie-parser'
 
 // ----- SERVER SETUP -----
 
@@ -10,6 +11,7 @@ export const app = express()
   .use(cors()) // Enable cross-origin requests for all clients
   .use(express.json())
   .use(express.urlencoded({ extended: false }))
+  .use(cookieParser())
 
 // ----- MIDDLEWARE FUNCTIONS -----
 

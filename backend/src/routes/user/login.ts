@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express'
 import argon2 from 'argon2'
 import { dbUsers } from '../../utils/database'
-import { generateAccessToken, generateRefreshToken } from '../../utils/tokens'
+import { useRefreshToken, generateAccessToken } from '../../utils/tokens'
 
 export const login: RequestHandler = async (req, res): Promise<any> => {
   const { email, password } = req.body
@@ -24,7 +24,7 @@ export const login: RequestHandler = async (req, res): Promise<any> => {
 
   // Generate access and refresh tokens for the user client
   const accessToken = generateAccessToken(user._id)
-  const refreshToken = await generateRefreshToken(user._id)
+  await useRefreshToken(user._id, res)
 
-  return res.status(200).json({ accessToken, refreshToken })
+  return res.status(200).json({ accessToken })
 }
