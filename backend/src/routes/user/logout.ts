@@ -1,17 +1,22 @@
 import { RequestHandler } from 'express'
 import { dbRefreshTokens } from '../../utils/database'
+import { refreshTokenOptions } from '../../utils/tokens'
 
 export const logout: RequestHandler = async (req, res): Promise<any> => {
-  const headerToken = req.headers.authorization?.at(-1)
+  const { refreshToken } = req.cookies
 
-  if (!headerToken) {
-    return res.status(401).send('No refresh token provided')
+  if (!refreshToken) {
+    return res.status(401).send('No session to invalidate')
   }
 
-  const deleteResult = await dbRefreshTokens.deleteOne({ token: headerToken })
+  // Remove refresh token from database
+  const deleteResult = await dbRefreshTokens.deleteOne({ token: refreshToken })
   if (!deleteResult.deletedCount) {
-    return res.status(400).send('Invalid login session')
+    return res.status(401).send('Invalid login session provided')
   }
+
+  // Remove refresh token from cookies
+  res.clearCookie('refreshToken', refreshTokenOptions)
 
   res.status(200).send('Logout successful')
 }
