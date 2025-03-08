@@ -10,7 +10,14 @@ export const MONGODB_CONNECTION_URI = env
   .asString()
 export const DB_NAME = env.get('DB_NAME').required().asString()
 
-export const JWT_SECRET = env.get('JWT_SECRET').required().asString()
+export const ACCESS_TOKEN_SECRET = env
+  .get('ACCESS_TOKEN_SECRET')
+  .required()
+  .asString()
+export const REFRESH_TOKEN_SECRET = env
+  .get('REFRESH_TOKEN_SECRET')
+  .required()
+  .asString()
 
 const NODE_ENV = env.get('NODE_ENV').default('development').asString()
 export const IS_PRODUCTION = NODE_ENV === 'production'
