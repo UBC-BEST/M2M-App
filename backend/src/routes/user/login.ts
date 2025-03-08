@@ -1,8 +1,7 @@
 import { RequestHandler } from 'express'
 import argon2 from 'argon2'
-import jwt from 'jsonwebtoken'
 import { dbUsers } from '../../utils/database'
-import { JWT_SECRET } from '../../utils/env'
+import { useRefreshToken, generateAccessToken } from '../../utils/tokens'
 
 export const login: RequestHandler = async (req, res): Promise<any> => {
   const { email, password } = req.body
@@ -23,9 +22,9 @@ export const login: RequestHandler = async (req, res): Promise<any> => {
     return res.status(401).send('Email and password do not match')
   }
 
-  // Generate a JSON Web Token for this session
-  const payload = { user: user._id }
-  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' })
+  // Generate access and refresh tokens for the user client
+  const accessToken = generateAccessToken(user._id)
+  await useRefreshToken(user._id, res)
 
-  return res.status(200).json({ message: `Login successful`, token })
+  return res.status(200).json({ accessToken })
 }

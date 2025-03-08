@@ -11,3 +11,6 @@ export const mongo = new MongoClient(MONGODB_CONNECTION_URI, {
 
 export const db = mongo.db(DB_NAME)
 export const dbUsers = db.collection('users')
+export const dbRefreshTokens = db.collection('refresh_tokens')
+
+process.on('exit', mongo.close)

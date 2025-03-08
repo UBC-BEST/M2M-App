@@ -1,8 +1,9 @@
 import cors from 'cors'
 import express, { ErrorRequestHandler } from 'express'
 import { userRouter } from './routes/user'
-import { db, mongo } from './utils/database'
+import { db } from './utils/database'
 import { DB_NAME, HOST, PORT } from './utils/env'
+import cookieParser from 'cookie-parser'
 
 // ----- SERVER SETUP -----
 
@@ -10,6 +11,7 @@ export const app = express()
   .use(cors()) // Enable cross-origin requests for all clients
   .use(express.json())
   .use(express.urlencoded({ extended: false }))
+  .use(cookieParser())
 
 // ----- MIDDLEWARE FUNCTIONS -----
 
@@ -41,8 +43,4 @@ app.use(function (err, req, res, next) {
 } as ErrorRequestHandler)
 
 // Termination
-export const exit = async () => {
-  server.close()
-  await mongo.close()
-}
-process.on('exit', exit)
+process.on('exit', server.close)
