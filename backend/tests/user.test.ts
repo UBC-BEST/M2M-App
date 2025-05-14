@@ -1,5 +1,5 @@
 import supertest = require('supertest')
-import { db, dbRefreshTokens, dbUsers } from '../src/utils/database'
+import { db, dbRefreshTokens, dbUsers, mongo } from '../src/utils/database'
 import { HOST, PORT } from '../src/utils/env'
 
 describe('/user', () => {
@@ -114,5 +114,7 @@ describe('/user', () => {
     const user = await dbUsers.findOne({ email: testEmail })
     await dbRefreshTokens.deleteMany({ userId: user?._id })
     await dbUsers.deleteOne({ _id: user?._id })
+
+    await mongo.close()
   })
 })
