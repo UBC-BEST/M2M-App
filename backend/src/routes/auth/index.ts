@@ -4,8 +4,8 @@ import { register } from './register'
 import { useAsync } from '../../utils/async'
 import { logout } from './logout'
 
-export const userRouter = express.Router()
+export const authRouter = express.Router()
 
-userRouter.post('/login', useAsync(login))
-userRouter.post('/logout', useAsync(logout))
-userRouter.post('/register', useAsync(register))
+authRouter.post('/login', useAsync(login))
+authRouter.post('/logout', useAsync(logout))
+authRouter.post('/register', useAsync(register))

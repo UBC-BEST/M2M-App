@@ -6,7 +6,7 @@ export const logout: RequestHandler = async (req, res): Promise<any> => {
   const { refreshToken } = req.cookies
 
   if (!refreshToken) {
-    return res.status(400).send('No provided session to invalidate')
+    return res.status(400).send('No refresh token provided')
   }
 
   const deleteResult = await dbRefreshTokens.deleteOne({ value: refreshToken })

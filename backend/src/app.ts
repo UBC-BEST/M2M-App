@@ -1,6 +1,6 @@
 import cors from 'cors'
 import express, { ErrorRequestHandler } from 'express'
-import { userRouter } from './routes/user'
+import { authRouter } from './routes/auth'
 import { db } from './utils/database'
 import { DB_NAME, HOST, PORT } from './utils/env'
 import cookieParser from 'cookie-parser'
@@ -15,7 +15,7 @@ export const app = express()
 
 // ----- MIDDLEWARE FUNCTIONS -----
 
-app.use('/user', userRouter)
+app.use('/auth', authRouter)
 app.get('/', (req, res) => {
   res.send('Network connection successful. Server running...')
 })

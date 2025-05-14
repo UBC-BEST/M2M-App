@@ -10,6 +10,7 @@ export const refreshTokenOptions: CookieOptions = {
   httpOnly: true, // Not readable by client scripts (OAuth2 compliant)
   sameSite: 'strict',
   secure: IS_PRODUCTION,
+  path: '/auth/refresh',
 }
 
 /** Generate a temporary access token for the specified user */

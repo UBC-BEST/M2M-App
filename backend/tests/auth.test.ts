@@ -2,7 +2,7 @@ import supertest = require('supertest')
 import { db, dbRefreshTokens, dbUsers, mongo } from '../src/utils/database'
 import { HOST, PORT } from '../src/utils/env'
 
-describe('/user', () => {
+describe('/auth', () => {
   const testEmail = 'test@example.com'
   const testName = 'Test Account'
   const testPw = 'Test_123'
@@ -14,7 +14,7 @@ describe('/user', () => {
   })
 
   test('/register SUCCESS', async () => {
-    const response = await agent.post('/user/register').send({
+    const response = await agent.post('/auth/register').send({
       email: testEmail,
       displayName: testName,
       password: testPw,
@@ -31,7 +31,7 @@ describe('/user', () => {
   })
 
   test('/register FAIL: Malformed request', async () => {
-    const response = await agent.post('/user/register').send({
+    const response = await agent.post('/auth/register').send({
       displayName: testName,
       password: testPw,
     })
@@ -40,7 +40,7 @@ describe('/user', () => {
   })
 
   test('/register FAIL: Duplicate email', async () => {
-    const response = await agent.post('/user/register').send({
+    const response = await agent.post('/auth/register').send({
       email: testEmail,
       displayName: testName,
       password: testPw,
@@ -50,7 +50,7 @@ describe('/user', () => {
   })
 
   test('/login SUCCESS', async () => {
-    const response = await agent.post('/user/login').send({
+    const response = await agent.post('/auth/login').send({
       email: testEmail,
       password: testPw,
     })
@@ -60,7 +60,7 @@ describe('/user', () => {
   })
 
   test('/login FAIL: Malformed request', async () => {
-    const response = await agent.post('/user/login').send({
+    const response = await agent.post('/auth/login').send({
       email: testEmail,
     })
 
@@ -68,7 +68,7 @@ describe('/user', () => {
   })
 
   test('/login FAIL: Invalid email', async () => {
-    const response = await agent.post('/user/login').send({
+    const response = await agent.post('/auth/login').send({
       email: testEmail + 'x',
       password: testPw,
     })
@@ -77,7 +77,7 @@ describe('/user', () => {
   })
 
   test('/login FAIL: Invalid password', async () => {
-    const response = await agent.post('/user/login').send({
+    const response = await agent.post('/auth/login').send({
       email: testEmail,
       password: testPw + '4',
     })
@@ -90,20 +90,20 @@ describe('/user', () => {
     const refreshToken = await dbRefreshTokens.findOne({ userId: user?._id })
 
     const response = await agent
-      .post('/user/logout')
+      .post('/auth/logout')
       .set('Cookie', `refreshToken=${refreshToken?.value}`)
       .send({})
     expect(response.status).toBe(200)
   })
 
   test('/logout FAIL: No session', async () => {
-    const response = await agent.post('/user/logout').send({})
+    const response = await agent.post('/auth/logout').send({})
     expect(response.status).toBe(400)
   })
 
   test('/logout FAIL: Invalid refresh token', async () => {
     const response = await agent
-      .post('/user/logout')
+      .post('/auth/logout')
       .set('Cookie', `refreshToken=123def`)
       .send({})
     expect(response.status).toBe(401)
