@@ -12,12 +12,13 @@ import { CookieOptions, Response } from 'express'
 import { dbRefreshTokens } from './database'
 import ms from 'ms'
 import { AccessTokenPayload, RefreshTokenPayload } from '../types/auth'
+import { DateTime } from 'luxon'
 
 export const refreshTokenOptions: CookieOptions = {
   httpOnly: true, // Not readable by client scripts (OAuth2 compliant)
   sameSite: 'strict',
   secure: IS_PRODUCTION,
-  path: '/auth/refresh',
+  path: '/auth/',
 }
 
 /** Generate a temporary access token for the specified user */
@@ -37,13 +38,19 @@ export const useRefreshToken = async (userId: ObjectId, res: Response) => {
     userId,
     value: randomBytes(64).toString('hex'),
   }
-  const token = jwt.sign(payload, REFRESH_TOKEN_SECRET, {
+  const refreshToken = jwt.sign(payload, REFRESH_TOKEN_SECRET, {
     expiresIn: REFRESH_TOKEN_EXPIRY,
   })
 
-  await dbRefreshTokens.insertOne({ userId, value: token })
+  // We save the entire signed JWT instead of only the randomly generated token value
+  // for simplicity and to preempt potential expiry tampering
+  await dbRefreshTokens.insertOne({
+    userId,
+    token: refreshToken,
+    createdAt: DateTime.now().toUnixInteger(),
+  })
 
-  res.cookie('refreshToken', token, {
+  res.cookie('refreshToken', refreshToken, {
     ...refreshTokenOptions,
     maxAge: ms(REFRESH_TOKEN_EXPIRY),
   })

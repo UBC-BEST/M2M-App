@@ -9,7 +9,7 @@ export const logout: RequestHandler = async (req, res): Promise<any> => {
     return res.status(400).send('No refresh token provided')
   }
 
-  const deleteResult = await dbRefreshTokens.deleteOne({ value: refreshToken })
+  const deleteResult = await dbRefreshTokens.deleteOne({ token: refreshToken })
   if (!deleteResult.deletedCount) {
     return res.status(401).send('Invalid login session provided')
   }

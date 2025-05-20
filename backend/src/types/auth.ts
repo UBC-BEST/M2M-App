@@ -6,5 +6,6 @@ export type AccessTokenPayload = {
 
 export type RefreshTokenPayload = {
   userId: ObjectId
+  /** Randomly generated filler string used to ensure token uniqueness */
   value: string
 }

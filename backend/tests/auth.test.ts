@@ -91,7 +91,7 @@ describe('/auth', () => {
 
     const response = await agent
       .post('/auth/logout')
-      .set('Cookie', `refreshToken=${refreshToken?.value}`)
+      .set('Cookie', `refreshToken=${refreshToken?.token}`)
       .send({})
     expect(response.status).toBe(200)
   })
