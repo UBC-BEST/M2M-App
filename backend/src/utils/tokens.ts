@@ -11,7 +11,6 @@ import { ObjectId } from 'mongodb'
 import { CookieOptions, Response } from 'express'
 import { dbRefreshTokens } from './database'
 import ms from 'ms'
-import { AccessTokenPayload, RefreshTokenPayload } from '../types/auth'
 import { DateTime } from 'luxon'
 
 export const refreshTokenOptions: CookieOptions = {
@@ -23,7 +22,7 @@ export const refreshTokenOptions: CookieOptions = {
 
 /** Generate a temporary access token for the specified user */
 export const generateAccessToken = (userId: ObjectId): string => {
-  const payload: AccessTokenPayload = { userId }
+  const payload = { userId }
   return jwt.sign(payload, ACCESS_TOKEN_SECRET, {
     expiresIn: ACCESS_TOKEN_EXPIRY,
   })
@@ -34,7 +33,7 @@ export const generateAccessToken = (userId: ObjectId): string => {
  * database and response cookies
  */
 export const useRefreshToken = async (userId: ObjectId, res: Response) => {
-  const payload: RefreshTokenPayload = {
+  const payload = {
     userId,
     value: randomBytes(64).toString('hex'),
   }
