@@ -1,9 +1,10 @@
 import { RequestHandler } from 'express'
-import jwt, { JwtPayload } from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 import { REFRESH_TOKEN_SECRET } from '../../utils/env'
 import { generateAccessToken, useRefreshToken } from '../../utils/tokens'
 import { dbRefreshTokens } from '../../utils/database'
 import { ObjectId } from 'mongodb'
+import { RefreshTokenPayload } from '../../types/tokens'
 
 export const refresh: RequestHandler = async (req, res): Promise<any> => {
   const { refreshToken } = req.cookies
@@ -14,9 +15,10 @@ export const refresh: RequestHandler = async (req, res): Promise<any> => {
 
   let userId: ObjectId
   try {
-    const payload = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET) as JwtPayload
-    userId = payload.userId
-  } catch (err) {
+    const payload = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET)
+    userId = (payload as RefreshTokenPayload).userId
+  } catch (error) {
+    console.error(error)
     return res.status(403).send('Malformed or expired refresh token')
   }
 
