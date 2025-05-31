@@ -13,16 +13,14 @@ export const register: RequestHandler = async (req, res): Promise<any> => {
     return res.status(400).send('Malformed request')
   }
 
-  // Check if there exists an account associated with this email
   if (await dbUsers.findOne({ email })) {
-    return res.status(409).send('Duplicate email')
+    return res.status(409).send('Email associated with existing account')
   }
 
   // One-way hash ensures password can be verified but not decrypted
   const pwHash = await argon2.hash(password)
   const userId = new ObjectId(randomBytes(12).toString('hex'))
 
-  // Add the new user to the database
   await dbUsers.insertOne({
     _id: userId,
     email,
@@ -32,7 +30,6 @@ export const register: RequestHandler = async (req, res): Promise<any> => {
     verified: false,
   })
 
-  // Generate access and refresh tokens for the user client
   const accessToken = generateAccessToken(userId)
   await useRefreshToken(userId, res)
 
