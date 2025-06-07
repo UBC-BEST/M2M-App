@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'unity_game_launch.dart';
-import 'home_page.dart';
-import 'games_page.dart';
-import 'stats_page.dart';
-import 'settings_page.dart';
+//import 'unity_game_launch.dart';
+import 'HomePage/home_page.dart';
+import 'StatsPage/stats_page.dart';
+import 'SettingsPage/settings_page.dart';
 
 class Navigation extends StatefulWidget {
   const Navigation({super.key});
@@ -16,7 +15,7 @@ class _NavigationState extends State<Navigation> {
   int currentPageIndex = 0;
 
   // List of games
-  List<Map<String, dynamic>> get games => [
+  /* List<Map<String, dynamic>> get games => [
         {'name': 'Pizza Game', 'onTap': _showPizzaGame},
         {
           'name': 'Golf Game',
@@ -26,6 +25,7 @@ class _NavigationState extends State<Navigation> {
         {'name': 'Spiderman', 'onTap': null}, // Placeholder for future game
         {'name': 'Valorant', 'onTap': null}, // Placeholder for future game
       ];
+*/
 
   @override
   Widget build(BuildContext context) {
@@ -36,11 +36,11 @@ class _NavigationState extends State<Navigation> {
       ),
       body: IndexedStack(
         index: currentPageIndex,
-        children: <Widget>[
-          const HomePageAuth(),
-          GamesPage(games: games), // Pass the dynamic list of games
-          const StatsPage(),
-          const SettingsPage(),
+        children: const <Widget>[
+          HomePageAuth(),
+            //GamesPage(games: games),
+          StatsPage(),
+          SettingsPage(),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -57,11 +57,11 @@ class _NavigationState extends State<Navigation> {
             icon: Icon(Icons.home_outlined),
             label: 'Home',
           ),
-          NavigationDestination(
+          /*NavigationDestination(
             selectedIcon: Icon(Icons.sports_esports, color: Colors.black),
             icon: Icon(Icons.sports_esports_outlined),
-            label: 'Games',
-          ),
+            label: 'Games', 
+          ), */
           NavigationDestination(
             selectedIcon: Icon(Icons.leaderboard, color: Colors.black),
             icon: Icon(Icons.leaderboard_outlined),
@@ -77,6 +77,7 @@ class _NavigationState extends State<Navigation> {
     );
   }
 
+/*
   // Navigate to Pizza Game
   void _showPizzaGame() {
     Navigator.push(
@@ -99,3 +100,4 @@ class _NavigationState extends State<Navigation> {
     );
   }
 }
+*/  }
