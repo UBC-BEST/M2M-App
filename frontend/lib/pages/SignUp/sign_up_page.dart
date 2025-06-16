@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:m2mapp/config.dart';
+import '../../config/config.dart';
 import 'dart:convert';
-import 'package:m2mapp/pages/Intro/training_selection.dart';
+import 'package:m2m/pages/Intro/training_selection.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});

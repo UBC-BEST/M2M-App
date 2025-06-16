@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 // import 'unity_game_launch.dart';
-import '../Home/HomePage/home_page.dart';
-import '../Home/GamesPage/games_page.dart';
-import '../Home/StatsPage/stats_page.dart';
-import '../Home/SettingsPage/settings_page.dart';
+import 'HomePage/home_page.dart';
+import 'GamesPage/games_page.dart';
+import 'StatsPage/stats_page.dart';
+import 'SettingsPage/settings_page.dart';
 
 class Navigation extends StatefulWidget {
   const Navigation({super.key});

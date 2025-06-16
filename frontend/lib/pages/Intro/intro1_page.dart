@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:m2mapp/pages/Login/login_page.dart';
+import '../Login/login_page.dart';
 import 'intro2_page.dart';
 
 void main() {

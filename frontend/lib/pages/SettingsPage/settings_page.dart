@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:m2mapp/pages/Login/login_page.dart';
+import '../Login/login_page.dart';
 import 'settings_tile.dart';
 import 'account_settings.dart';
 import 'appearance_settings.dart';

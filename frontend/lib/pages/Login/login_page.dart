@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:m2mapp/pages/Home/navigation.dart';
-import 'package:m2mapp/pages/SignUp/sign_up_page.dart';
-import 'package:m2mapp/config.dart';
+import 'package:m2m/pages/navigation.dart';
+import 'package:m2m/pages/SignUp/sign_up_page.dart';
+import 'package:m2m/config/config.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class LoginPage extends StatefulWidget {

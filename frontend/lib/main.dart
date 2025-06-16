@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'pages/Intro/intro1_page.dart';
 import 'pages/Login/login_page.dart';
-import 'pages/Home/navigation.dart';
+import 'pages/navigation.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
