@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:m2mapp/pages/Home/StatsPage/stats_page.dart';
 // import 'unity_game_launch.dart';
 import 'home_page.dart';
 import 'games_page.dart';
@@ -56,11 +57,11 @@ class _NavigationState extends State<Navigation> {
             icon: Icon(Icons.home_outlined),
             label: 'Home',
           ),
-          NavigationDestination(
+          /*NavigationDestination(
             selectedIcon: Icon(Icons.sports_esports, color: Colors.black),
             icon: Icon(Icons.sports_esports_outlined),
-            label: 'Games',
-          ),
+            label: 'Games', 
+          ), */
           NavigationDestination(
             selectedIcon: Icon(Icons.leaderboard, color: Colors.black),
             icon: Icon(Icons.leaderboard_outlined),
