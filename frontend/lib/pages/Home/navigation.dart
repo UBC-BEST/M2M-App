@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:m2mapp/pages/Home/StatsPage/stats_page.dart';
 // import 'unity_game_launch.dart';
-import 'home_page.dart';
-import 'games_page.dart';
-import 'stats_page.dart';
-import 'settings_page.dart';
+import '../Home/HomePage/home_page.dart';
+import '../Home/GamesPage/games_page.dart';
+import '../Home/StatsPage/stats_page.dart';
+import '../Home/SettingsPage/settings_page.dart';
 
 class Navigation extends StatefulWidget {
   const Navigation({super.key});
@@ -21,10 +20,10 @@ class _NavigationState extends State<Navigation> {
         {
           'name': 'Golf Game',
           'onTap': null,
-        }, //Just an example of future implmentation
-        {'name': 'Call of Duty', 'onTap': null}, // Placeholder for future game
-        {'name': 'Spiderman', 'onTap': null}, // Placeholder for future game
-        {'name': 'Valorant', 'onTap': null}, // Placeholder for future game
+        },
+        {'name': 'Call of Duty', 'onTap': null},
+        {'name': 'Spiderman', 'onTap': null},
+        {'name': 'Valorant', 'onTap': null},
       ];
 
   @override
@@ -38,7 +37,7 @@ class _NavigationState extends State<Navigation> {
         index: currentPageIndex,
         children: <Widget>[
           const HomePage(),
-          GamesPage(games: games), // Pass the dynamic list of games
+          GamesPage(games: games),
           const StatsPage(),
           const SettingsPage(),
         ],
@@ -57,11 +56,11 @@ class _NavigationState extends State<Navigation> {
             icon: Icon(Icons.home_outlined),
             label: 'Home',
           ),
-          /*NavigationDestination(
+          NavigationDestination(
             selectedIcon: Icon(Icons.sports_esports, color: Colors.black),
             icon: Icon(Icons.sports_esports_outlined),
-            label: 'Games', 
-          ), */
+            label: 'Games',
+          ),
           NavigationDestination(
             selectedIcon: Icon(Icons.leaderboard, color: Colors.black),
             icon: Icon(Icons.leaderboard_outlined),
