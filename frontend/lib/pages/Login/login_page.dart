@@ -1,24 +1,102 @@
 import 'package:flutter/material.dart';
-import 'package:m2mapp/pages/Intro/training_selection.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:m2mapp/pages/Home/navigation.dart';
 import 'package:m2mapp/pages/SignUp/sign_up_page.dart';
+import 'package:m2mapp/config.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-// We have to discuss what kind of backend we are using for user data handling like signing up.
-// Firebase???
-// Once the user is signed in for the first time -> ask them if they would like to use biometric auth to sign into the application from now on.
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  Future<void> loginUser() async {
+    setState(() => _isLoading = true);
+
+    final String email = emailController.text.trim();
+    final String password = passwordController.text;
+
+    final url = Uri.parse('$serverEndpoint/auth/login');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'password': password}),
+    );
+
+    setState(() => _isLoading = false);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final accessToken = data['accessToken'];
+
+      final prefs = await SharedPreferences.getInstance();
+      final secureStorage = FlutterSecureStorage();
+      await prefs.setString('accessToken', accessToken);
+
+      final bool alreadyUsingFaceID = prefs.getBool('useFaceID') == true;
+
+      if (!alreadyUsingFaceID) {
+        if (!mounted) return;
+
+        final shouldEnable = await showDialog<bool>(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Enable Face ID?'),
+              content: const Text(
+                'Would you like to enable Face ID for easier logins in the future?',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('No'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('Yes'),
+                ),
+              ],
+            );
+          },
+        );
+
+        if (!mounted) return;
+
+        if (shouldEnable == true) {
+          await prefs.setBool('useFaceID', true);
+          await secureStorage.write(key: 'email', value: email);
+          await secureStorage.write(key: 'password', value: password);
+        }
+      }
+
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const Navigation()),
+      );
+    } else {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login failed: ${response.body}')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login'),
-      ),
-
-      // Gesture Detector is used so that when the user clicks out of the textbox, the keyboard will disappear
+      appBar: AppBar(title: const Text('Login')),
       body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context).unfocus();
-        },
+        onTap: () => FocusScope.of(context).unfocus(),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Center(
@@ -28,123 +106,75 @@ class LoginPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    //Insert Log In Photo in this Sized Box
                     const SizedBox(height: 100),
-                    // Email Field
                     TextFormField(
+                      controller: emailController,
                       decoration: const InputDecoration(
                         labelText: 'Email',
                         labelStyle:
                             TextStyle(fontSize: 13, color: Colors.black),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.grey,
-                            width: 1.0,
-                          ),
+                          borderSide: BorderSide(color: Colors.grey),
                         ),
                       ),
-                      style: const TextStyle(
-                        fontSize: 13,
-                      ),
-                      obscureText: false,
+                      style: const TextStyle(fontSize: 13),
                       cursorColor: Colors.black,
                     ),
                     const SizedBox(height: 10),
-
-                    // Password Field
-                    // This field uses Obscure to hide the password that the user is inputting
-                    // Maybe add a "show password" button or something?? I find this useful sometimes
                     TextFormField(
+                      controller: passwordController,
                       decoration: const InputDecoration(
                         labelText: 'Password',
                         labelStyle:
                             TextStyle(fontSize: 13, color: Colors.black),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.grey,
-                            width: 1.0,
-                          ),
+                          borderSide: BorderSide(color: Colors.grey),
                         ),
                       ),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Colors.black,
-                      ),
-                      cursorColor: Colors.black,
+                      style: const TextStyle(fontSize: 13),
                       obscureText: true,
+                      cursorColor: Colors.black,
                     ),
-
-                    // Forgot Password Button
+                    const SizedBox(height: 10),
                     Align(
                       alignment: Alignment.center,
                       child: TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.black,
-                          textStyle: const TextStyle(fontSize: 13),
-                          overlayColor: null,
-                        ),
-                        onPressed: () {
-                          // Handle forgot password action
-                        },
-                        child: const Text(
-                          'Forgot Password?',
-                        ),
+                        onPressed: () {},
+                        child: const Text('Forgot Password?',
+                            style: TextStyle(fontSize: 13)),
                       ),
                     ),
-
-                    // Login Button
+                    _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.blue.shade600,
+                              textStyle: const TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: loginUser,
+                            child: const Text('Login'),
+                          ),
                     TextButton(
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Colors.blue.shade600,
-                        textStyle: const TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.bold),
-                      ),
                       onPressed: () {
                         Navigator.push(
                           context,
-                          // The Login button currently submits to nothing.
-                          // Currently goes to the next page (training page)
-                          MaterialPageRoute(
-                            builder: (context) => const TrainingSelectionPage(),
-                          ),
-                        );
-                      },
-                      child: const Text('Login'),
-                    ),
-
-                    // Create Account Button
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.black,
-                        textStyle: const TextStyle(fontSize: 13),
-                        overlayColor: null,
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SignUpPage(),
-                          ),
+                          MaterialPageRoute(builder: (_) => const SignUpPage()),
                         );
                       },
                       child: const Text.rich(
                         TextSpan(
                           children: [
                             TextSpan(
-                              text: "Don't have an account? ",
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.black,
-                              ),
-                            ),
+                                text: "Don't have an account? ",
+                                style: TextStyle(fontSize: 13)),
                             TextSpan(
                               text: 'Sign Up',
                               style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold,
-                              ),
+                                  fontSize: 13,
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),

@@ -7,8 +7,6 @@ class GamesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Simple list that shows all of the games on a horizontal scrolling axis
-    // It takes game information passed by landing.dart to name the tiles
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
