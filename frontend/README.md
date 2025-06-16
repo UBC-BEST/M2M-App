@@ -54,4 +54,4 @@ Both frontend and backend must run in sync.
 
 ### 📬 Questions?
 
-For help running the app, contact [@jnhan](https://github.com/jnhan).
+For help running the frontend of the app, contact [@jnhan](https://github.com/jn-han) on discord.
