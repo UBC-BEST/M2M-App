@@ -26,16 +26,16 @@ class SettingsTile extends StatelessWidget {
           if (subtitle != null)
             Text(
               subtitle!,
-              style: TextStyle(color: Colors.grey, fontSize: 14),
+              style: const TextStyle(color: Colors.grey, fontSize: 14),
             ),
           const SizedBox(width: 8),
           const Icon(Icons.chevron_right, color: Colors.grey, size: 30.0),
         ],
       ),
       onTap: onTap,
-      visualDensity: VisualDensity(vertical: -1),
+      visualDensity: const VisualDensity(vertical: -1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     );
   }
 }
