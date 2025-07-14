@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'pages/Intro/intro1_page.dart';
-import 'pages/Login/login_page.dart';
-import 'pages/navigation.dart';
+import 'features/app_introduction/intro1_page.dart';
+import 'features/login_page/login_page.dart';
+import 'features/navigation_bar/navigation_bar.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -58,6 +60,15 @@ class MyApp extends StatelessWidget {
         primaryColor: Colors.blue,
         colorScheme: ColorScheme.fromSwatch().copyWith(primary: Colors.blue),
       ),
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'),
+      ],
       home: initialPage,
     );
   }
