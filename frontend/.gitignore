@@ -22,6 +22,10 @@ android/app/build/
 android/local.properties
 android/key.properties
 
+# Unity iOS Burst debug build artifacts
+ios/UnityLibrary_BurstDebugInformation_DoNotShip/
+ios/UnityLibrary_BurstDebugInformation_DoNotShip/*
+
 # iOS
 ios/Pods/
 ios/Runner.xcworkspace/
