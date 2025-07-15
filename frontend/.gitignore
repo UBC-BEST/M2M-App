@@ -7,6 +7,15 @@ ios/Flutter/Flutter.framework
 ios/Flutter/Flutter.podspec
 ios/Flutter/Generated.xcconfig
 
+# Flutter/Dart build outputs
+build/
+android/app/build/
+ios/Pods/
+macos/build/
+windows/build/
+linux/build/
+web/build/
+
 # Android
 android/.gradle/
 android/app/build/
