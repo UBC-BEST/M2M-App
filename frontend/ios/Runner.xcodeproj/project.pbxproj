@@ -15,8 +15,6 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
-		BF1CF74B2D3336BB004355E6 /* UnityFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1CF7482D3335EA004355E6 /* UnityFramework.framework */; };
-		BF1CF74C2D3336BB004355E6 /* UnityFramework.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = BF1CF7482D3335EA004355E6 /* UnityFramework.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E5B412A0C50B6CB910F446BF /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD0052452662DF98692EDC56 /* Pods_Runner.framework */; };
 /* End PBXBuildFile section */
 
@@ -58,20 +56,6 @@
 		};
 /* End PBXContainerItemProxy section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		9705A1C41CF9048500538489 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				BF1CF74C2D3336BB004355E6 /* UnityFramework.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
 		03834EA87A8849E5D05A3464 /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
@@ -105,7 +89,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				E5B412A0C50B6CB910F446BF /* Pods_Runner.framework in Frameworks */,
-				BF1CF74B2D3336BB004355E6 /* UnityFramework.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -240,7 +223,6 @@
 				97C146EA1CF9000F007C117D /* Sources */,
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
-				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				3F0DBCC09521C13AED659953 /* [CP] Embed Pods Frameworks */,
 			);

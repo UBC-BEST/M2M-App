@@ -3,7 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  flutter_unity_widget
+  flutter_secure_storage_windows
   local_auth_windows
 )
 

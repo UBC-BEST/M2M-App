@@ -1,0 +1,86 @@
+# Flutter/Dart/Pub related
+.dart_tool/
+.packages
+.pub/
+build/
+
+# Android
+android/.gradle/
+android/app/build/
+android/local.properties
+android/key.properties
+
+# Unity iOS Burst debug build artifacts
+ios/UnityLibrary_BurstDebugInformation_DoNotShip/
+
+# iOS
+ios/Pods/
+ios/Runner.xcworkspace/
+ios/DerivedData/
+ios/.symlinks/
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+
+# Xcode
+*.xcworkspace
+*.xcuserstate
+*.xcscmblueprint
+*.xcuserdatad
+*.moved-aside
+DerivedData/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+*.mode2v3
+
+# VS Code
+.vscode/
+.history/
+
+# IntelliJ/Android Studio & JetBrains Rider
+.idea/
+*.iml
+
+# macOS
+macos/Flutter/ephemeral/
+macos/Flutter/GeneratedPluginRegistrant.swift
+macos/build/
+
+# Web
+web/.dart_tool/
+web/build/
+
+# Windows
+windows/Flutter/ephemeral/
+windows/build/
+
+# Linux
+linux/Flutter/ephemeral/
+linux/build/
+
+# Misc
+*.log
+*.tmp
+
+# Environment variables
+.env
+.env.*
+
+# Crashlytics, Firebase, Fastlane
+firebase_app_id_file.json
+crashlytics-build.properties
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+
+# Coverage
+coverage/
+
+# User-specific files
+*.swp
+*.swo
+
+# Remove if you want to commit generated plugin registrant (rare)
+GeneratedPluginRegistrant.*

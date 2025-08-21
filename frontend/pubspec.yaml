@@ -1,4 +1,4 @@
-name: m2mapp
+name: m2m
 description: "A new Flutter project."
 publish_to: "none"
 version: 0.1.0
@@ -9,9 +9,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
   badges: ^2.0.3
   local_auth: ^2.3.0
-  flutter_unity_widget: ^2022.2.0
+  flutter_dotenv: ^5.1.0
+  http: ^0.13.6
+  flutter_secure_storage: ^9.0.0
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:
@@ -20,3 +26,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
+  assets:
+    - .env

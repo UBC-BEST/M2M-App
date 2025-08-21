@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:m2mapp/pages/Intro/intro1_page.dart';
+import 'intro1_page.dart';
 import 'intro3_page.dart';
-import '../Login/login_page.dart';
+import '../login_page/login_page.dart';
 
 class IntroPage2 extends StatelessWidget {
   const IntroPage2({super.key});
