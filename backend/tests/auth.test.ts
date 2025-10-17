@@ -99,7 +99,7 @@ describe('/auth', () => {
   describe('/refresh', () => {
     let expiredToken: string
 
-    test('/refresh SUCCESS', async () => {
+    test('SUCCESS', async () => {
       const response = await agent
         .post('/auth/refresh')
         .set('Cookie', `refreshToken=${refreshToken}`)
@@ -112,12 +112,12 @@ describe('/auth', () => {
       expect(response.status).toBe(200)
     })
 
-    test('/refresh FAIL: No refresh token', async () => {
+    test('FAIL: No refresh token', async () => {
       const response = await agent.post('/auth/refresh').send({})
       expect(response.status).toBe(401)
     })
 
-    test('/refresh FAIL: Malformed refresh token', async () => {
+    test('FAIL: Malformed refresh token', async () => {
       const response = await agent
         .post('/auth/refresh')
         .set('Cookie', `refreshToken=abc456`)
@@ -126,7 +126,7 @@ describe('/auth', () => {
       expect(response.status).toBe(403)
     })
 
-    test('/refresh FAIL: Invalid refresh token', async () => {
+    test('FAIL: Invalid refresh token', async () => {
       const response = await agent
         .post('/auth/refresh')
         .set('Cookie', `refreshToken=${expiredToken}`) // NOTE: this is the old refresh token
@@ -137,7 +137,7 @@ describe('/auth', () => {
   })
 
   describe('/logout', () => {
-    test('/logout SUCCESS', async () => {
+    test('SUCCESS', async () => {
       const response = await agent
         .post('/auth/logout')
         .set('Cookie', `refreshToken=${refreshToken}`)
@@ -145,12 +145,12 @@ describe('/auth', () => {
       expect(response.status).toBe(200)
     })
 
-    test('/logout FAIL: No session', async () => {
+    test('FAIL: No session', async () => {
       const response = await agent.post('/auth/logout').send({})
       expect(response.status).toBe(400)
     })
 
-    test('/logout FAIL: Invalid refresh token', async () => {
+    test('FAIL: Invalid refresh token', async () => {
       const response = await agent
         .post('/auth/logout')
         .set('Cookie', `refreshToken=123def`)
