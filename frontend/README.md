@@ -1,4 +1,4 @@
-# 💪 Muscle to Movement Flutter Application
+# M2M Frontend
 
 ## 🚀 Getting Started
 
