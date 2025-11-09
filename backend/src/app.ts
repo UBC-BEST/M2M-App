@@ -40,8 +40,9 @@ export const server = app.listen(PORT, () => {
 // Errors (error handlers always have 4 arguments, it's an express thing)
 // eslint-disable-next-line no-unused-vars
 app.use(function (err, req, res, next) {
-  console.error(err.message)
-  res.status(err.status || 500).send(err.message || 'Internal Server Error')
+  const message = err.message || err || 'Internal Server Error'
+  console.error(req.path, message)
+  res.status(err.status || 500).send(message)
 } as ErrorRequestHandler)
 
 // Termination
