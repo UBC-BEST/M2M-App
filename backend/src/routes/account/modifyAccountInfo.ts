@@ -2,15 +2,13 @@ import { RequestHandler } from 'express'
 import { validateAccessToken } from '../../utils/tokens'
 import { dbUsers } from '../../utils/database'
 import { UserDocument } from '../../types/documents'
+import { BadRequestError, NotFoundError } from '../../utils/errors'
 
-export const modifyAccountInfo: RequestHandler = async (
-  req,
-  res
-): Promise<any> => {
+export const modifyAccountInfo: RequestHandler = async (req, res) => {
   const userId = validateAccessToken(req).userId
 
   if (!(await dbUsers.findOne({ userId }))) {
-    return res.status(404).send('User not found')
+    throw new NotFoundError('User not found')
   }
 
   const { displayName, email } = req.body
@@ -25,10 +23,10 @@ export const modifyAccountInfo: RequestHandler = async (
   }
 
   if (!Object.keys(updateObject).length) {
-    return res.status(400).send('Malformed request')
+    throw new BadRequestError('No valid update values provided')
   }
 
   await dbUsers.updateOne({ userId: userId }, { $set: updateObject })
 
-  return res.status(200).send('Changes applied to account')
+  res.status(200).send('Changes applied to account')
 }

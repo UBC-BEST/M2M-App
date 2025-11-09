@@ -46,7 +46,6 @@ export const validateAccessToken = (req: Request): AccessTokenPayload => {
   try {
     return jwt.verify(tokenString, ACCESS_TOKEN_SECRET) as AccessTokenPayload
   } catch (error) {
-    console.error(error)
     throw new ForbiddenError('Malformed or expired access token')
   }
 }

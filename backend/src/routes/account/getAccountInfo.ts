@@ -2,16 +2,14 @@ import { RequestHandler } from 'express'
 import { validateAccessToken } from '../../utils/tokens'
 import { dbUsers } from '../../utils/database'
 import { UserDocument } from '../../types/documents'
+import { NotFoundError } from '../../utils/errors'
 
-export const getAccountInfo: RequestHandler = async (
-  req,
-  res
-): Promise<any> => {
+export const getAccountInfo: RequestHandler = async (req, res) => {
   const userId = validateAccessToken(req).userId
 
   const user = await dbUsers.findOne({ userId })
   if (!user) {
-    return res.status(404).send('User not found')
+    throw new NotFoundError('User with specified id not found')
   }
 
   const userResult: Partial<UserDocument> = {
@@ -21,5 +19,5 @@ export const getAccountInfo: RequestHandler = async (
     createdAt: user.createdAt,
   }
 
-  return res.status(200).send(userResult)
+  res.status(200).send(userResult)
 }
