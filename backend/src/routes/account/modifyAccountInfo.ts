@@ -7,8 +7,9 @@ import { BadRequestError, NotFoundError } from '../../utils/errors'
 export const modifyAccountInfo: RequestHandler = async (req, res) => {
   const userId = validateAccessToken(req).userId
 
-  if (!(await dbUsers.findOne({ userId }))) {
-    throw new NotFoundError('User not found')
+  const user = await dbUsers.findOne({ _id: userId })
+  if (!user) {
+    throw new NotFoundError('User with specified id not found')
   }
 
   const { displayName, email } = req.body
@@ -26,7 +27,7 @@ export const modifyAccountInfo: RequestHandler = async (req, res) => {
     throw new BadRequestError('No valid update values provided')
   }
 
-  await dbUsers.updateOne({ userId: userId }, { $set: updateObject })
+  await dbUsers.updateOne({ _id: userId }, { $set: updateObject })
 
   res.status(200).send('Changes applied to account')
 }
