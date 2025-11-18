@@ -31,7 +31,7 @@ export const generateAccessToken = (userId: ObjectId): string => {
 }
 
 /**
- * Checks if the access token provided is legitimate and returns the payload if so
+ * Checks if the access token in the given request is legitimate and returns the payload if so
  * @param req fetch request with authorization header containing access token
  * @throws ResponseError if not provided with a valid access token
  */
@@ -44,9 +44,41 @@ export const validateAccessToken = (req: Request): AccessTokenPayload => {
   }
 
   try {
-    return jwt.verify(tokenString, ACCESS_TOKEN_SECRET) as AccessTokenPayload
+    const jwtResult = jwt.verify(
+      tokenString,
+      ACCESS_TOKEN_SECRET
+    ) as AccessTokenPayload
+
+    // Cannot use decoded JWT directly because userId was compressed from ObjectId to string
+    return {
+      userId: new ObjectId(jwtResult.userId),
+    }
   } catch (error) {
     throw new ForbiddenError('Malformed or expired access token')
+  }
+}
+
+/**
+ * Checks if the given refresh token  is legitimate and returns the payload if so
+ * @param encodedToken encoded JWT refresh token
+ * @throws ResponseError if not provided with a valid access token
+ */
+export const validateRefreshToken = (
+  encodedToken: string
+): RefreshTokenPayload => {
+  try {
+    const payload = jwt.verify(
+      encodedToken,
+      REFRESH_TOKEN_SECRET
+    ) as RefreshTokenPayload
+
+    // Cannot use decoded JWT directly because userId was compressed from ObjectId to string
+    return {
+      userId: new ObjectId(payload.userId),
+      value: payload.value,
+    }
+  } catch (error) {
+    throw new ForbiddenError('Malformed or expired refresh token')
   }
 }
 
