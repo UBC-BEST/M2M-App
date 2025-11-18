@@ -1,23 +1,18 @@
 import supertest = require('supertest')
-import { db, dbRefreshTokens, dbUsers, mongo } from '../src/utils/database'
+import { dbRefreshTokens, dbUsers, mongo } from '../src/utils/database'
 import { HOST, PORT } from '../src/utils/env'
 import { WithId } from 'mongodb'
 import { UserDocument } from '../src/types/documents'
 
 describe('/auth', () => {
-  const testEmail = 'test@example.com'
-  const testName = 'Test Account'
+  const testEmail = 'auth@test.com'
+  const testName = 'Auth Test'
   const testPw = 'Test_123'
   const agent = supertest(`${HOST}:${PORT}`)
 
   // IMPORTANT: TEST ORDER AFFECTS THE ENTRIES BELOW AND THEIR CORRESPONDING DATABASE ENTRIES
   let user: WithId<UserDocument>
   let refreshToken: string
-
-  test('Connect', async () => {
-    const ping = async () => await db.command({ ping: 1 })
-    expect(ping).not.toThrow()
-  })
 
   describe('/register', () => {
     test('SUCCESS', async () => {
