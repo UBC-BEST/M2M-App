@@ -54,17 +54,41 @@ describe('/account', () => {
   })
 
   describe('/modify', () => {
-    test('SUCCESS', async () => {
+    test('SUCCESS: Change display name', async () => {
       const newName = 'Test Account'
       const response = await agent
         .post('/account/modify')
         .set('Authorization', `Bearer ${accessToken}`)
         .send({ displayName: newName })
 
-      user = (await dbUsers.findOne({ email: testEmail }))!
+      user = (await dbUsers.findOne({ _id: user._id }))!
 
       expect(response.status).toBe(200)
       expect(user.displayName).toBe(newName)
+    })
+
+    test('SUCCESS: Change all editable fields', async () => {
+      const newName = 'Best Account'
+      const newEmail = 'account2@test.com'
+      const response = await agent
+        .post('/account/modify')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ displayName: newName, email: newEmail })
+
+      user = (await dbUsers.findOne({ _id: user._id }))!
+
+      expect(response.status).toBe(200)
+      expect(user.displayName).toBe(newName)
+      expect(user.email).toBe(newEmail)
+    })
+
+    test('FAIL: No update values provided', async () => {
+      const response = await agent
+        .post('/account/modify')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({})
+
+      expect(response.status).toBe(400)
     })
   })
 
