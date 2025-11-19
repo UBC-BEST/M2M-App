@@ -41,8 +41,10 @@ export const server = app.listen(PORT, () => {
 // eslint-disable-next-line no-unused-vars
 app.use(function (err, req, res, next) {
   const message = err.message || err || 'Internal Server Error'
-  console.error(req.path, message)
-  res.status(err.status || 500).send(message)
+  const status = err.status || 500
+
+  console.error(req.path, status, message)
+  res.status(status).send(message)
 } as ErrorRequestHandler)
 
 // Termination
