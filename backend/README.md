@@ -16,19 +16,19 @@ This guide assumes that you are already in the [UBC-BEST](https://github.com/UBC
 6. Initialize environment variables.
    1. Create a file called `.env` in `../M2M-App/backend` and copy in the following template:
       ```
-      HOST=http://localhost
+      HOST="http://localhost"
       PORT=6969
       MONGODB_CONNECTION_URI=
-      NODE_ENV=development
-      DB_NAME=m2m
+      NODE_ENV="development"
+      DB_NAME="m2m"
       ACCESS_TOKEN_SECRET=
       REFRESH_TOKEN_SECRET=
       ```
-   2. For `MONGODB_CONNECTION_URI` use the connection string from above. Remember to replace the `<db_password>` part appropriately.
+   2. For `MONGODB_CONNECTION_URI` use the connection string from above. Remember to replace the `<db_password>` part appropriately and surround the string with quotes (like with the `HOST` variable).
    3. For `ACCESS_TOKEN_SECRET` and `REFRESH_TOKEN_SECRET` respectively, run\
       `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`\
-      then copy the result into the env variable. Note that the two secrets should NOT be the same.
-7. Boot up the server by running `yarn start`. If everything was done correctly, the console output should be something like:
+      then copy the result into the env variable (remember to use quotes). Note that the two secrets should NOT be the same.
+7. Boot up the server by running `yarn start`, or alternatively `yarn dev` for live reloads (restart on code change). If everything was done correctly, the console output should be something like:
    
    ```
    Server running at http://localhost:6969

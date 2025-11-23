@@ -5,6 +5,7 @@
   "main": "src/app.ts",
   "scripts": {
     "start": "node scripts/build.mjs && node dist/bundle.mjs",
+    "dev": "nodemon -x yarn start",
     "test": "jest"
   },
   "dependencies": {
@@ -37,11 +38,22 @@
     "eslint-plugin-jest": "^28.10.0",
     "globals": "^15.12.0",
     "jest": "^29.7.0",
+    "nodemon": "^3.1.11",
     "prettier": "^3.3.3",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.14.0"
   },
-  "packageManager": "yarn@4.5.1"
+  "packageManager": "yarn@4.5.1",
+  "nodemonConfig": {
+    "ignore": [
+      ".yarn/",
+      "tests/",
+      "dist/",
+      "node_modules/",
+      "package-lock.json"
+    ],
+    "ext": "ts, json"
+  }
 }

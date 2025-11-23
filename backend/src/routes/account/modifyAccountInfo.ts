@@ -1,31 +1,33 @@
 import { RequestHandler } from 'express'
 import { validateAccessToken } from '../../utils/tokens'
-import { ObjectId } from 'mongodb'
 import { dbUsers } from '../../utils/database'
+import { UserDocument } from '../../types/documents'
+import { BadRequestError, NotFoundError } from '../../utils/errors'
 
-export const modifyAccountInfo: RequestHandler = async (
-  req,
-  res
-): Promise<any> => {
-  let userId: ObjectId
-  try {
-    const payload = validateAccessToken(req)
-    userId = payload.userId
-  } catch (error: any) {
-    return res.status(error.status || 500).send(error.message)
+export const modifyAccountInfo: RequestHandler = async (req, res) => {
+  const userId = validateAccessToken(req).userId
+
+  const user = await dbUsers.findOne({ _id: userId })
+  if (!user) {
+    throw new NotFoundError('User with specified id not found')
   }
 
-  if (!(await dbUsers.findOne({ userId }))) {
-    return res.status(404).send('User not found')
+  const { displayName, email } = req.body
+  const updateObject: Partial<UserDocument> = {}
+
+  if (displayName) {
+    updateObject.displayName = displayName
   }
 
-  const { displayName } = req.body
-
-  if (!displayName) {
-    return res.status(400).send('Malformed request')
+  if (email) {
+    updateObject.email = email
   }
 
-  await dbUsers.updateOne({ userId: userId }, { $set: { displayName } })
+  if (!Object.keys(updateObject).length) {
+    throw new BadRequestError('No valid update values provided')
+  }
 
-  return res.status(200).send('Changes applied to account')
+  await dbUsers.updateOne({ _id: userId }, { $set: updateObject })
+
+  res.status(200).send('Changes applied to account')
 }
