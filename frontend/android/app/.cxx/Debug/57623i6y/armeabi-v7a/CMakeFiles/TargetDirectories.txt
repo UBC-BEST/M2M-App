@@ -1,0 +1,2 @@
+C:/Users/kelly/Documents/code/M2M-App/frontend/android/app/.cxx/Debug/57623i6y/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/kelly/Documents/code/M2M-App/frontend/android/app/.cxx/Debug/57623i6y/armeabi-v7a/CMakeFiles/rebuild_cache.dir
