@@ -6,6 +6,13 @@ export type RefreshTokenDocument = {
   createdAt: number
 }
 
+export type VerifyTokenDocument = {
+  userId: ObjectId
+  email: string
+  token: string
+  createdAt: number
+}
+
 export type UserDocument = {
   email: string
   pwHash: string

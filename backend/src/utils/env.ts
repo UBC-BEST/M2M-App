@@ -29,5 +29,20 @@ export const REFRESH_TOKEN_EXPIRY = env
   .default('90d')
   .asString() as StringValue
 
+export const DISABLE_EMAILS = env
+  .get('DISABLE_EMAILS')
+  .default('false')
+  .asBoolStrict()
+
+export const EMAIL_TOKEN_EXPIRY = env
+  .get('EMAIL_TOKEN_EXPIRY')
+  .default('7d')
+  .asString() as StringValue
+
+export const MAILGUN_API_SECRET = env
+  .get('MAILGUN_API_SECRET')
+  .required(!DISABLE_EMAILS)
+  .asString()
+
 const NODE_ENV = env.get('NODE_ENV').default('development').asString()
 export const IS_PRODUCTION = NODE_ENV === 'production'
