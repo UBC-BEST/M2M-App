@@ -3,17 +3,22 @@ import jwt from 'jsonwebtoken'
 import {
   ACCESS_TOKEN_EXPIRY,
   ACCESS_TOKEN_SECRET,
+  EMAIL_TOKEN_EXPIRY,
   IS_PRODUCTION,
   REFRESH_TOKEN_EXPIRY,
   REFRESH_TOKEN_SECRET,
 } from './env'
 import { ObjectId } from 'mongodb'
 import { CookieOptions, Request, Response } from 'express'
-import { dbRefreshTokens } from './database'
+import { dbRefreshTokens, dbVerifyTokens } from './database'
 import ms from 'ms'
 import { DateTime } from 'luxon'
 import { BadRequestError, ForbiddenError } from './errors'
-import { AccessTokenPayload, RefreshTokenPayload } from '../types/tokens'
+import {
+  AccessTokenPayload,
+  RefreshTokenPayload,
+  VerifyTokenPayload,
+} from '../types/tokens'
 
 export const refreshTokenOptions: CookieOptions = {
   httpOnly: true, // Not readable by client scripts (OAuth2 compliant)
@@ -107,4 +112,29 @@ export const useRefreshToken = async (userId: ObjectId, res: Response) => {
     ...refreshTokenOptions,
     maxAge: ms(REFRESH_TOKEN_EXPIRY),
   })
+}
+
+/**
+ * Generate a revocable email verification token for the specified user, then save it to
+ * database
+ */
+export const useVerifyToken = async (userId: ObjectId, email: string) => {
+  const payload: VerifyTokenPayload = {
+    userId,
+    email,
+    value: randomBytes(16).toString('hex'),
+  }
+
+  const refreshToken = jwt.sign(payload, REFRESH_TOKEN_SECRET, {
+    expiresIn: EMAIL_TOKEN_EXPIRY,
+  })
+
+  await dbVerifyTokens.insertOne({
+    userId,
+    email,
+    token: refreshToken,
+    createdAt: DateTime.now().toUnixInteger(),
+  })
+
+  return refreshToken
 }

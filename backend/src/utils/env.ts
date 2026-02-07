@@ -39,6 +39,11 @@ export const EMAIL_TOKEN_EXPIRY = env
   .default('7d')
   .asString() as StringValue
 
+export const EMAIL_SENDER_DOMAIN = env
+  .get('EMAIL_SENDER_DOMAIN')
+  .required()
+  .asString()
+
 export const MAILGUN_API_SECRET = env
   .get('MAILGUN_API_SECRET')
   .required(!DISABLE_EMAILS)
