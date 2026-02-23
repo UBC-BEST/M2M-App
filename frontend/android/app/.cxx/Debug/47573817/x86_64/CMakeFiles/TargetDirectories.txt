@@ -1,0 +1,2 @@
+C:/Users/kelly/Documents/m2mcode/M2M-App/frontend/android/app/.cxx/Debug/47573817/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/kelly/Documents/m2mcode/M2M-App/frontend/android/app/.cxx/Debug/47573817/x86_64/CMakeFiles/rebuild_cache.dir

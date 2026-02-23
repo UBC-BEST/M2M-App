@@ -165,7 +165,6 @@ class _OnboardingSlideData {
 
 class _OnboardingSlide extends StatelessWidget {
   const _OnboardingSlide({
-    super.key,
     required this.slide,
   });
 
