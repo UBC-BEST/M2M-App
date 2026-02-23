@@ -5,14 +5,18 @@ class RepsCompletedBarChart extends StatelessWidget {
   const RepsCompletedBarChart({
     super.key,
     required this.reps, // 7 values, Mon..Sun
-    this.maxY = 20,
   });
 
   final List<int> reps;
-  final double maxY;
 
   @override
   Widget build(BuildContext context) {
+    assert(reps.length == 7, 'Expected 7 values for reps (Mon..Sun)');
+
+    final maxValue = reps.reduce((a, b) => a > b ? a : b);
+    final computedMaxY = maxValue *
+        1.2; // Add 20% headroom for better visualization (so bar does not exceed graph)
+
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       const Text('Repetitions Completed',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -26,7 +30,7 @@ class RepsCompletedBarChart extends StatelessWidget {
             BarChartData(
               alignment: BarChartAlignment.spaceAround,
               minY: 0,
-              maxY: 10,
+              maxY: computedMaxY,
 
               // Add grid lines
               gridData: FlGridData(

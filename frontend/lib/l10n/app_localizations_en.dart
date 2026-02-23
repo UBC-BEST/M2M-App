@@ -72,7 +72,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enableFaceIdTitle => 'Enable Face ID?';
 
   @override
-  String get enableFaceIdDescription => 'Would you like to enable Face ID for easier logins in the future?';
+  String get enableFaceIdDescription =>
+      'Would you like to enable Face ID for easier logins in the future?';
 
   @override
   String get noButtonLabel => 'No';
@@ -162,7 +163,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gameValorant => 'Valorant';
 
   @override
-  String get statsPagePlaceholder => 'Stats coming soon';
+  String get statsPageTitle => 'Track Your Progress';
 
   @override
   String get trainingSelectionTitle => 'Training Selection';
@@ -195,7 +196,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get changeNameHeading => 'Change Name';
 
   @override
-  String get changeNameDescription => 'You can change your name every 90 days and username every 30 days.';
+  String get changeNameDescription =>
+      'You can change your name every 90 days and username every 30 days.';
 
   @override
   String get emailSettingsTitle => 'Email Settings';
@@ -222,17 +224,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingExerciseTitle => 'Complete exercises';
 
   @override
-  String get onboardingExerciseDescription => 'Work through guided routines built with your therapist.';
+  String get onboardingExerciseDescription =>
+      'Work through guided routines built with your therapist.';
 
   @override
   String get onboardingGamesTitle => 'Play interactive games';
 
   @override
-  String get onboardingGamesDescription => 'Stay engaged with motivating sessions tailored to your goals.';
+  String get onboardingGamesDescription =>
+      'Stay engaged with motivating sessions tailored to your goals.';
 
   @override
   String get onboardingProgressTitle => 'Track your progress';
 
   @override
-  String get onboardingProgressDescription => 'See improvements over time and celebrate every milestone.';
+  String get onboardingProgressDescription =>
+      'See improvements over time and celebrate every milestone.';
 }
