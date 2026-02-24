@@ -18,17 +18,13 @@ class StatsPage extends StatelessWidget {
     final sampleLineData = [20.0, 35.0, 50.0, 40.0, 60.0, 80.0, 70.0];
 
     return Scaffold(
-      /*appBar: AppBar(
-        title: Text(localizations.statsPageTitle),
-        backgroundColor: Colors.white,
-        centerTitle: true,
-      ), */
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Page title
               Text(localizations.statsPageTitle,
                   style: theme.textTheme.headlineMedium),
 
