@@ -4,21 +4,18 @@ import {
   ACCESS_TOKEN_EXPIRY,
   ACCESS_TOKEN_SECRET,
   EMAIL_TOKEN_EXPIRY,
+  EMAIL_TOKEN_SECRET,
   IS_PRODUCTION,
   REFRESH_TOKEN_EXPIRY,
   REFRESH_TOKEN_SECRET,
 } from './env'
 import { ObjectId } from 'mongodb'
 import { CookieOptions, Request, Response } from 'express'
-import { dbRefreshTokens, dbVerifyTokens } from './database'
+import { dbRefreshTokens } from './database'
 import ms from 'ms'
 import { DateTime } from 'luxon'
 import { BadRequestError, ForbiddenError } from './errors'
-import {
-  AccessTokenPayload,
-  RefreshTokenPayload,
-  VerifyTokenPayload,
-} from '../types/tokens'
+import { AccessTokenPayload, RefreshTokenPayload } from '../types/tokens'
 
 export const refreshTokenOptions: CookieOptions = {
   httpOnly: true, // Not readable by client scripts (OAuth2 compliant)
@@ -42,15 +39,15 @@ export const generateAccessToken = (userId: ObjectId): string => {
  */
 export const validateAccessToken = (req: Request): AccessTokenPayload => {
   // Access token is retrieved from header `Authorization: Bearer <TOKEN>`
-  const tokenString = req.headers['authorization']?.split(' ').at(1)
+  const encodedToken = req.headers['authorization']?.split(' ').at(1)
 
-  if (!tokenString) {
+  if (!encodedToken) {
     throw new BadRequestError('No access token provided')
   }
 
   try {
     const jwtResult = jwt.verify(
-      tokenString,
+      encodedToken,
       ACCESS_TOKEN_SECRET
     ) as AccessTokenPayload
 
@@ -115,26 +112,17 @@ export const useRefreshToken = async (userId: ObjectId, res: Response) => {
 }
 
 /**
- * Generate a revocable email verification token for the specified user, then save it to
- * database
+ * Generates a token for use in
  */
-export const useVerifyToken = async (userId: ObjectId, email: string) => {
-  const payload: VerifyTokenPayload = {
-    userId,
-    email,
-    value: randomBytes(16).toString('hex'),
-  }
-
-  const refreshToken = jwt.sign(payload, REFRESH_TOKEN_SECRET, {
+export const generateEmailToken = async () => {
+  // Use a randomized payload to ensure length and uniqueness of JWT
+  const payload = randomBytes(16).toString('hex')
+  const token = jwt.sign(payload, EMAIL_TOKEN_SECRET, {
     expiresIn: EMAIL_TOKEN_EXPIRY,
   })
 
-  await dbVerifyTokens.insertOne({
-    userId,
-    email,
-    token: refreshToken,
-    createdAt: DateTime.now().toUnixInteger(),
-  })
+  const createdAt = DateTime.now().toUnixInteger()
+  const expiresAt = DateTime.now().plus(ms(EMAIL_TOKEN_EXPIRY)).toUnixInteger()
 
-  return refreshToken
+  return { token, createdAt, expiresAt }
 }

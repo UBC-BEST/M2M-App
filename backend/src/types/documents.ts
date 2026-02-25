@@ -11,6 +11,7 @@ export type VerifyTokenDocument = {
   email: string
   token: string
   createdAt: number
+  expiresAt: number
 }
 
 export type UserDocument = {

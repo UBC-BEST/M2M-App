@@ -29,24 +29,30 @@ export const REFRESH_TOKEN_EXPIRY = env
   .default('90d')
   .asString() as StringValue
 
-export const DISABLE_EMAILS = env
-  .get('DISABLE_EMAILS')
-  .default('false')
-  .asBoolStrict()
-
+export const EMAIL_TOKEN_SECRET = env
+  .get('EMAIL_TOKEN_SECRET')
+  .required()
+  .asString()
 export const EMAIL_TOKEN_EXPIRY = env
   .get('EMAIL_TOKEN_EXPIRY')
   .default('7d')
   .asString() as StringValue
-
 export const EMAIL_SENDER_DOMAIN = env
   .get('EMAIL_SENDER_DOMAIN')
   .required()
   .asString()
-
+export const DISABLE_EMAILS = env
+  .get('DISABLE_EMAILS')
+  .default('false')
+  .asBoolStrict()
 export const MAILGUN_API_SECRET = env
   .get('MAILGUN_API_SECRET')
   .required(!DISABLE_EMAILS)
+  .asString()
+
+export const CLIENT_URL = env
+  .get('CLIENT_URL')
+  .default('http://localhost:8080')
   .asString()
 
 const NODE_ENV = env.get('NODE_ENV').default('development').asString()

@@ -14,12 +14,9 @@ const cssStyles = fs.readFileSync('src/templates/styles.css', 'utf-8')
 
 /**
  * Loads an HTML template from the templates directory and inlines the shared
- * stylesheet in place of the external CSS link.
+ * stylesheet in place of the external CSS link
  *
- * @param fileName The template file name without the `.html` extension.
- *
- * @returns The HTML template contents with the stylesheet link replaced by an
- * inline `<style>` block.
+ * @param fileName The template file name without the `.html` extension
  */
 export const loadTemplate = (fileName: string) => {
   const filePath = `src/templates/${fileName}.html`
@@ -31,13 +28,11 @@ export const loadTemplate = (fileName: string) => {
 }
 
 /**
- * Replaces placeholder tokens in an HTML template with the provided values.
+ * Replaces placeholder tokens in an HTML template with the provided values
  *
- * @param rawTemplate The source HTML template as a string.
- * @param variables A key-value map where each key replaces its matching
- * `{{key}}` placeholder in the template.
- *
- * @returns The processed HTML string with all matching placeholders replaced.
+ * @param rawTemplate The source HTML template as a string
+ * @param variables A key-value map that specifies which values should be used
+ * for `{{key}}` placeholders in the template
  */
 export const useTemplate = (
   rawTemplate: string,
@@ -55,11 +50,11 @@ export const useTemplate = (
 type MailgunMessageData = Parameters<typeof mailgunClient.messages.create>[1]
 
 /**
- * Sends an email through Mailgun using the provided message data.
+ * Sends an email through Mailgun using the provided message data
  *
- * @param data The Mailgun message payload to send.
- * @returns A promise that resolves to `true` if Mailgun reports a successful
- * send, or `false` if the request fails or returns an unexpected status.
+ * @param data The Mailgun message payload to send
+ *
+ * @returns `true` if the send was successful and `false` otherwise
  */
 export const sendEmail = async (data: MailgunMessageData): Promise<boolean> => {
   const formOptions: MailgunMessageData = {

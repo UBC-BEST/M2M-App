@@ -42,3 +42,10 @@ export class DataConflictError extends ResponseError {
     this.name = 'DataConflictError'
   }
 }
+
+export class ServiceUnavailableError extends ResponseError {
+  constructor(message: string) {
+    super(message, 503)
+    this.name = 'ServiceUnavailableError'
+  }
+}
