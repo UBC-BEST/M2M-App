@@ -1,8 +1,8 @@
 import { RequestHandler } from 'express'
 import { CLIENT_URL } from '../../utils/env'
-import { dbVerifyTokens } from '../../utils/database'
+import { dbUsers, dbVerifyTokens } from '../../utils/database'
 import { loadTemplate, sendEmail, useTemplate } from '../../utils/email'
-import { ServiceUnavailableError } from '../../utils/errors'
+import { NotFoundError, ServiceUnavailableError } from '../../utils/errors'
 import { generateEmailToken } from '../../utils/tokens'
 
 const verifyEmailForm = loadTemplate('verifyEmail')
@@ -13,6 +13,15 @@ const verifyEmailForm = loadTemplate('verifyEmail')
  */
 export const sendVerifyLink: RequestHandler = async (req, res) => {
   const { userId, email } = req.body
+
+  const user = await dbUsers.findOne({ _id: userId })
+  if (!user) {
+    throw new NotFoundError('User with specified id not found')
+  }
+
+  if (user.email !== email) {
+    throw new NotFoundError('Email not associated with specified user')
+  }
 
   const { token, createdAt, expiresAt } = await generateEmailToken()
   await dbVerifyTokens.insertOne({
