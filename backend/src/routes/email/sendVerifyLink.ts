@@ -3,16 +3,17 @@ import { CLIENT_URL } from '../../utils/env'
 import { dbUsers, dbVerifyTokens } from '../../utils/database'
 import { loadTemplate, sendEmail, useTemplate } from '../../utils/email'
 import { NotFoundError, ServiceUnavailableError } from '../../utils/errors'
-import { generateEmailToken } from '../../utils/tokens'
+import { generateEmailToken, validateAccessToken } from '../../utils/tokens'
 
 const verifyEmailForm = loadTemplate('verifyEmail')
 
 /**
- * Generates a revocable email verification token for the specified user,
+ * Generates a revocable email verification token for the caller
  * then saves the token to database and sends out an email
  */
 export const sendVerifyLink: RequestHandler = async (req, res) => {
-  const { userId, email } = req.body
+  const userId = validateAccessToken(req).userId
+  const { email } = req.body
 
   const user = await dbUsers.findOne({ _id: userId })
   if (!user) {
@@ -22,6 +23,9 @@ export const sendVerifyLink: RequestHandler = async (req, res) => {
   if (user.email !== email) {
     throw new NotFoundError('Email not associated with specified user')
   }
+
+  // Make sure no duplicate verification codes exist in the system
+  await dbVerifyTokens.findOneAndDelete({ email })
 
   const { token, createdAt, expiresAt } = await generateEmailToken()
   await dbVerifyTokens.insertOne({
