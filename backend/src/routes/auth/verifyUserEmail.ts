@@ -5,7 +5,7 @@ import { EMAIL_TOKEN_SECRET } from '../../utils/env'
 import { ForbiddenError, NotFoundError } from '../../utils/errors'
 import { generateAccessToken, useRefreshToken } from '../../utils/tokens'
 
-export const verifyAccount: RequestHandler = async (req, res) => {
+export const verifyUserEmail: RequestHandler = async (req, res) => {
   const { token } = req.body
 
   // Delete on retrieval since tokens are single use
