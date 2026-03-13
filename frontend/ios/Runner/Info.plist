@@ -28,6 +28,8 @@
 	<true/>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Requires biometrics to secure user data</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Uses Bluetooth to read FSR values from the ESP32.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
