@@ -96,7 +96,7 @@ class _SettingsPageState extends State<SettingsPage> {
               title: Text(localizations.loginWithFaceId),
               value: _useFaceId,
               onChanged: _toggleFaceId,
-              activeThumbColor: Colors.blue,
+              //activeThumbColor: Colors.blue,
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
