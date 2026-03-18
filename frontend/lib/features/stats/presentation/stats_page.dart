@@ -265,7 +265,7 @@ class _StatsPageState extends State<StatsPage> {
     _notifySub = characteristic.onValueReceived.listen((value) {
       if (value.length < 2) return;
       final raw = value[0] | (value[1] << 8);
-      final clamped = raw.clamp(0, 4095) as int;
+      final clamped = raw.clamp(0, 4095);
 
       _rawValue = clamped;
       if (!_hasSmoothedValue) {
