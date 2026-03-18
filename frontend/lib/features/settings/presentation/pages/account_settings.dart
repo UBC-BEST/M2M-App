@@ -40,7 +40,7 @@ class AccountSettings extends StatelessWidget {
               subtitle: placeholderEmail,
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const EmailChange()),
+                MaterialPageRoute(builder: (context) => EmailChange()),
               ),
             ),
             SettingsTile(

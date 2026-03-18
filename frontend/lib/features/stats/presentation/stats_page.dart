@@ -4,7 +4,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:m2m/core/config/app_config.dart';
+import 'package:m2m/l10n/app_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import 'bar_chart.dart';
+import 'line_chart.dart';
 
 class StatsPage extends StatefulWidget {
   const StatsPage({super.key});
@@ -357,90 +361,99 @@ class _StatsPageState extends State<StatsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final percent = (_smoothedValue / 4095) * 100;
     final maxPercent = (_maxValue / 4095) * 100;
+    final sampleBarData = [2, 5, 15, 7, 10, 30, 11];
+    final sampleLineData = [20.0, 35.0, 50.0, 40.0, 60.0, 80.0, 70.0];
 
-    return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-        children: [
-          Text(
-            'Data',
-            style: theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: Colors.black,
+    return Scaffold(
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+          children: [
+            Text(
+              localizations.statsPageTitle,
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: Colors.black,
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          _StatusCard(
-            status: _status,
-            isError: _statusIsError,
-            isBusy: _isScanning || _isConnecting,
-            isConnected: _isConnected,
-          ),
-          const SizedBox(height: 18),
-          Text(
-            'FSR Pressure',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: Colors.black,
+            const SizedBox(height: 24),
+            RepsCompletedBarChart(reps: sampleBarData),
+            const SizedBox(height: 32),
+            ForceOutputLineChart(lineData: sampleLineData),
+            const SizedBox(height: 16),
+            _StatusCard(
+              status: _status,
+              isError: _statusIsError,
+              isBusy: _isScanning || _isConnecting,
+              isConnected: _isConnected,
             ),
-          ),
-          const SizedBox(height: 12),
-          _PercentBar(
-            percent: percent.clamp(0, 100),
-            color: const Color(0xFF719E66),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _ValueCard(
-                  title: 'Raw',
-                  value: _rawValue.toString(),
+            const SizedBox(height: 18),
+            Text(
+              'FSR Pressure',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _PercentBar(
+              percent: percent.clamp(0, 100),
+              color: const Color(0xFF719E66),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _ValueCard(
+                    title: 'Raw',
+                    value: _rawValue.toString(),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _ValueCard(
-                  title: 'Max %',
-                  value: '${maxPercent.clamp(0, 100).toStringAsFixed(1)}%',
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _ValueCard(
+                    title: 'Max %',
+                    value: '${maxPercent.clamp(0, 100).toStringAsFixed(1)}%',
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: OutlinedButton(
-              onPressed: () => setState(() => _maxValue = 0),
-              child: const Text('Reset Max'),
+              ],
             ),
-          ),
-          const SizedBox(height: 20),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              ElevatedButton(
-                onPressed: _isScanning || _isConnecting
-                    ? null
-                    : _startScanWithFallback,
-                child: const Text('Rescan'),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton(
+                onPressed: () => setState(() => _maxValue = 0),
+                child: const Text('Reset Max'),
               ),
-              OutlinedButton(
-                onPressed: _isConnected ? _safeDisconnect : null,
-                child: const Text('Disconnect'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Percent is normalized to the 0–4095 ADC range.',
-            style: theme.textTheme.bodySmall?.copyWith(color: Colors.black54),
-          ),
-        ],
+            ),
+            const SizedBox(height: 20),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                ElevatedButton(
+                  onPressed: _isScanning || _isConnecting
+                      ? null
+                      : _startScanWithFallback,
+                  child: const Text('Rescan'),
+                ),
+                OutlinedButton(
+                  onPressed: _isConnected ? _safeDisconnect : null,
+                  child: const Text('Disconnect'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Percent is normalized to the 0-4095 ADC range.',
+              style: theme.textTheme.bodySmall?.copyWith(color: Colors.black54),
+            ),
+          ],
+        ),
       ),
     );
   }
