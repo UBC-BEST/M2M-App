@@ -24,7 +24,14 @@ Inside the `frontend` folder, create a `.env` file with the following content:
 ```env
 FLUTTER_APP_EXP_IP=your_computer_ip_or_localhost
 FLUTTER_APP_EXP_PORT=6969
+FLUTTER_APP_BLE_SERVICE_UUID=6e400001-b5a3-f393-e0a9-e50e24dcca9e
+FLUTTER_APP_BLE_CHARACTERISTIC_UUID=6e400002-b5a3-f393-e0a9-e50e24dcca9e
 ```
+
+#### 🧩 BLE Configuration
+
+- `FLUTTER_APP_BLE_SERVICE_UUID`: The BLE service UUID advertised by the ESP32. The app uses this to find and verify the correct device during scanning and after connection.
+- `FLUTTER_APP_BLE_CHARACTERISTIC_UUID`: The BLE characteristic UUID used for READ + NOTIFY to receive the 2-byte FSR ADC values.
 
 #### 🔍 How to find your IP address:
 

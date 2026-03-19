@@ -7,6 +7,13 @@ class AppConfig {
   static const _baseUrlKey = 'FLUTTER_APP_BASE_URL';
   static const _ipKey = 'FLUTTER_APP_EXP_IP';
   static const _portKey = 'FLUTTER_APP_EXP_PORT';
+  static const _bleServiceUuidKey = 'FLUTTER_APP_BLE_SERVICE_UUID';
+  static const _bleCharacteristicUuidKey = 'FLUTTER_APP_BLE_CHARACTERISTIC_UUID';
+
+  static const _defaultBleServiceUuid =
+      '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+  static const _defaultBleCharacteristicUuid =
+      '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
 
   /// Returns the server base URL defined in the `.env` file.
   ///
@@ -33,6 +40,25 @@ class AppConfig {
     final sanitizedIp = ip.startsWith('http') ? ip : 'http://$ip';
     return port != null && port.isNotEmpty ? '$sanitizedIp:$port' : sanitizedIp;
   }
+
+  /// Returns the BLE service UUID.
+  ///
+  /// Defaults to the ESP32 service UUID if not provided in the `.env` file.
+  static String get bleServiceUuid {
+    final value = _read(_bleServiceUuidKey);
+    return value != null && value.isNotEmpty ? value : _defaultBleServiceUuid;
+  }
+
+  /// Returns the BLE characteristic UUID.
+  ///
+  /// Defaults to the ESP32 characteristic UUID if not provided in the `.env` file.
+  static String get bleCharacteristicUuid {
+    final value = _read(_bleCharacteristicUuidKey);
+    return value != null && value.isNotEmpty
+        ? value
+        : _defaultBleCharacteristicUuid;
+  }
+
 
   static String? _read(String key) => dotenv.env[key]?.trim();
 }
