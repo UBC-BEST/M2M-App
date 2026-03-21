@@ -11,7 +11,7 @@ import { WEBAUTHN_CHALLENGE_EXPIRY, WEBAUTHN_RP_NAME } from '../../../utils/env'
 import { DateTime } from 'luxon'
 import ms from 'ms'
 
-export const registerPasskey: RequestHandler = async (req, res) => {
+export const beginPasskeyRegister: RequestHandler = async (req, res) => {
   const userId = validateAccessToken(req).userId
 
   const user = await dbUsers.findOne({ _id: userId })

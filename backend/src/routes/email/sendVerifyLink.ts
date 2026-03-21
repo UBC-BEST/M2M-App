@@ -48,5 +48,5 @@ export const sendVerifyLink: RequestHandler = async (req, res) => {
     throw new ServiceUnavailableError('Failed to send verification email')
   }
 
-  res.send('Sent verification email')
+  res.status(200).send('Sent verification email')
 }
