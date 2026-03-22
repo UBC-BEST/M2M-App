@@ -15,13 +15,17 @@ export const confirmPasskeyRegister: RequestHandler = async (req, res) => {
 
   const { auth, label } = req.body
 
+  if (!auth) {
+    throw new BadRequestError('Missing required field `auth` in request body')
+  }
+
   const challenge = await dbPasskeyChallenges.findOneAndDelete({
     userId,
     type: 'registration',
   })
 
   if (!challenge) {
-    throw new BadRequestError('Passkey egistration challenge not found')
+    throw new BadRequestError('Passkey registration challenge not found')
   }
 
   if (challenge.expiresAt < DateTime.now().toUnixInteger()) {
