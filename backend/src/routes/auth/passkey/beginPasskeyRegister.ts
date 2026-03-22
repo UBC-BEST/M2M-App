@@ -5,7 +5,7 @@ import {
   dbPasskeys,
   dbUsers,
 } from '../../../utils/database'
-import { NotFoundError } from '../../../utils/errors'
+import { ForbiddenError, NotFoundError } from '../../../utils/errors'
 import { generateRegistrationOptions } from '@simplewebauthn/server'
 import { WEBAUTHN_CHALLENGE_EXPIRY, WEBAUTHN_RP_NAME } from '../../../utils/env'
 import { DateTime } from 'luxon'
@@ -17,6 +17,10 @@ export const beginPasskeyRegister: RequestHandler = async (req, res) => {
   const user = await dbUsers.findOne({ _id: userId })
   if (!user) {
     throw new NotFoundError('User with specified id not found')
+  }
+
+  if (!user.verified) {
+    throw new ForbiddenError('Email must be verified before using passkeys')
   }
 
   const existingPasskeys = await dbPasskeys.find({ userId }).toArray()
@@ -53,5 +57,5 @@ export const beginPasskeyRegister: RequestHandler = async (req, res) => {
       .toUnixInteger(),
   })
 
-  res.json(options)
+  res.status(200).json(options)
 }

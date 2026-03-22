@@ -1,15 +1,10 @@
 import { RequestHandler } from 'express'
 import { validateAccessToken } from '../../../utils/tokens'
-import {
-  dbPasskeyChallenges,
-  dbPasskeys,
-  dbUsers,
-} from '../../../utils/database'
+import { dbPasskeyChallenges, dbPasskeys } from '../../../utils/database'
 import {
   BadRequestError,
   DataConflictError,
   ForbiddenError,
-  NotFoundError,
 } from '../../../utils/errors'
 import { DateTime } from 'luxon'
 import { verifyRegistrationResponse } from '@simplewebauthn/server'

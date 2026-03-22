@@ -18,7 +18,7 @@ export class BadRequestError extends ResponseError {
 export class UnauthorizedError extends ResponseError {
   constructor(message: string) {
     super(message, 401)
-    this.name = 'BadRequestError'
+    this.name = 'UnauthorizedError'
   }
 }
 

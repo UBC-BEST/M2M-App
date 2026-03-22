@@ -38,7 +38,7 @@ export type PasskeyDocument = {
 
 export type PasskeyChallengeDocument = {
   userId: ObjectId
-  type: 'registration'
+  type: 'registration' | 'authentication'
   challenge: string
   createdAt: number
   expiresAt: number
