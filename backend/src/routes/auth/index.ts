@@ -4,7 +4,7 @@ import { register } from './register'
 import { useAsync } from '../../utils/async'
 import { logout } from './logout'
 import { refresh } from './refresh'
-import { verifyUserEmail } from './verifyUserEmail'
+import { verifyUserEmail } from './link/verifyUserEmail'
 import { passkeyRouter } from './passkey'
 
 export const authRouter = express.Router()

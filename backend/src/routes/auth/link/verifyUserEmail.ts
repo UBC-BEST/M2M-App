@@ -1,9 +1,9 @@
 import { RequestHandler } from 'express'
-import { dbUsers, dbVerifyTokens } from '../../utils/database'
+import { dbUsers, dbVerifyTokens } from '../../../utils/database'
 import jwt from 'jsonwebtoken'
-import { EMAIL_TOKEN_SECRET } from '../../utils/env'
-import { ForbiddenError, NotFoundError } from '../../utils/errors'
-import { generateAccessToken, useRefreshToken } from '../../utils/tokens'
+import { EMAIL_TOKEN_SECRET } from '../../../utils/env'
+import { ForbiddenError, NotFoundError } from '../../../utils/errors'
+import { generateAccessToken, useRefreshToken } from '../../../utils/tokens'
 
 export const verifyUserEmail: RequestHandler = async (req, res) => {
   const { token } = req.body

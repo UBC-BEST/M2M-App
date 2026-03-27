@@ -13,6 +13,7 @@ import {
 import { DateTime } from 'luxon'
 import { verifyAuthenticationResponse } from '@simplewebauthn/server'
 import { WEBAUTHN_RP_ID, WEBAUTHN_RP_ORIGIN } from '../../../utils/env'
+import { generateAccessToken, useRefreshToken } from '../../../utils/tokens'
 
 export const confirmPasskeyLogin: RequestHandler = async (req, res) => {
   const { email, auth } = req.body
@@ -82,5 +83,10 @@ export const confirmPasskeyLogin: RequestHandler = async (req, res) => {
     }
   )
 
-  res.status(200).json({})
+  const accessToken = generateAccessToken(user._id)
+  await useRefreshToken(user._id, res)
+
+  res.status(200).json({
+    accessToken,
+  })
 }
