@@ -155,7 +155,9 @@ class BluetoothSensorService extends ChangeNotifier {
     }
 
     await _stopScan();
-    if (_scanResults.isEmpty) {
+    if (_isConnected && _selectedDevice != null) {
+      _setStatus('Connected to ${_selectedDevice!.displayName}');
+    } else if (_scanResults.isEmpty) {
       _setStatus('No compatible devices found', isError: true);
     } else {
       _setStatus('Compatible devices found');

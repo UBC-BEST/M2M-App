@@ -42,17 +42,20 @@ class _StatsPageState extends State<StatsPage> {
     final maxPercent = _sensorService.maxPercent.clamp(0, 100).toDouble();
     final sampleBarData = [2, 5, 15, 7, 10, 30, 11];
     final sampleLineData = [20.0, 35.0, 50.0, 40.0, 60.0, 80.0, 70.0];
-    final sourceText = _sensorService.statusIsError
-        ? _sensorService.status
-        : _sensorService.selectedDevice == null
-            ? 'Select and connect your FSR sensor in Settings to stream live data.'
-            : _sensorService.isConnected
-                ? 'Live source: ${_sensorService.selectedDevice!.displayName}'
-                : _sensorService.isConnecting
-                    ? 'Connecting to ${_sensorService.selectedDevice!.displayName}...'
+    final sourceText = _sensorService.selectedDevice == null
+        ? 'Select and connect your FSR sensor in Settings to stream live data.'
+        : _sensorService.isConnected
+            ? 'Live source: ${_sensorService.selectedDevice!.displayName}'
+            : _sensorService.isConnecting
+                ? 'Connecting to ${_sensorService.selectedDevice!.displayName}...'
+                : _sensorService.statusIsError
+                    ? _sensorService.status
                     : 'Using saved sensor: ${_sensorService.selectedDevice!.displayName}';
-    final sourceColor =
-        _sensorService.statusIsError ? const Color(0xFFB00020) : Colors.black54;
+    final sourceColor = (_sensorService.statusIsError &&
+            !_sensorService.isConnected &&
+            !_sensorService.isConnecting)
+        ? const Color(0xFFB00020)
+        : Colors.black54;
 
     return Scaffold(
       body: SafeArea(
@@ -75,7 +78,9 @@ class _StatsPageState extends State<StatsPage> {
               sourceText,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: sourceColor,
-                fontWeight: _sensorService.statusIsError
+                fontWeight: (_sensorService.statusIsError &&
+                        !_sensorService.isConnected &&
+                        !_sensorService.isConnecting)
                     ? FontWeight.w600
                     : FontWeight.w500,
               ),
