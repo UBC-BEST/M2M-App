@@ -5,7 +5,7 @@ import {
   PasskeyDocument,
   RefreshTokenDocument,
   UserDocument,
-  VerifyTokenDocument,
+  LinkTokenDocument,
 } from '../types/documents'
 
 export const mongo = new MongoClient(MONGODB_CONNECTION_URI, {
@@ -20,8 +20,7 @@ export const db = mongo.db(DB_NAME)
 export const dbUsers = db.collection<UserDocument>('users')
 export const dbRefreshTokens =
   db.collection<RefreshTokenDocument>('refresh_tokens')
-export const dbVerifyTokens =
-  db.collection<VerifyTokenDocument>('verify_tokens')
+export const dbLinkTokens = db.collection<LinkTokenDocument>('link_tokens')
 export const dbPasskeys = db.collection<PasskeyDocument>('passkeys')
 export const dbPasskeyChallenges =
   db.collection<PasskeyChallengeDocument>('passkey_challenges')

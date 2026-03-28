@@ -7,12 +7,13 @@ export type RefreshTokenDocument = {
   createdAt: number
 }
 
-export type VerifyTokenDocument = {
+export type LinkTokenDocument = {
   userId: ObjectId
   email: string
   token: string
   createdAt: number
   expiresAt: number
+  type: 'email_verify' | 'login_link'
 }
 
 export type UserDocument = {
