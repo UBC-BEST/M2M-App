@@ -4,8 +4,8 @@ import { register } from './register'
 import { useAsync } from '../../utils/async'
 import { logout } from './logout'
 import { refresh } from './refresh'
-import { applyEmailVerifyLink } from './link/applyEmailVerifyLink'
 import { passkeyRouter } from './passkey'
+import { linkRouter } from './link/linkRouter'
 
 export const authRouter = express.Router()
 
@@ -13,5 +13,5 @@ authRouter.post('/login', useAsync(login))
 authRouter.post('/logout', useAsync(logout))
 authRouter.post('/register', useAsync(register))
 authRouter.post('/refresh', useAsync(refresh))
-authRouter.post('/verify', useAsync(applyEmailVerifyLink))
 authRouter.use('/passkey', passkeyRouter)
+authRouter.use('/link', linkRouter)
