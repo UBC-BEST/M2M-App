@@ -1,4 +1,4 @@
-import { EMAIL_SENDER_DOMAIN, MAILGUN_API_SECRET } from './env'
+import { DISABLE_EMAILS, EMAIL_SENDER_DOMAIN, MAILGUN_API_SECRET } from './env'
 import fs from 'fs'
 import Mailgun from 'mailgun.js'
 import FormData from 'form-data'
@@ -7,7 +7,7 @@ const mailgun = new Mailgun(FormData)
 
 export const mailgunClient = mailgun.client({
   username: 'api',
-  key: MAILGUN_API_SECRET,
+  key: MAILGUN_API_SECRET ?? '',
 })
 
 const cssStyles = fs.readFileSync('src/templates/styles.css', 'utf-8')
@@ -57,6 +57,12 @@ type MailgunMessageData = Parameters<typeof mailgunClient.messages.create>[1]
  * @returns `true` if the send was successful and `false` otherwise
  */
 export const sendEmail = async (data: MailgunMessageData): Promise<boolean> => {
+  if (DISABLE_EMAILS) {
+    console.warn('sendEmail: Disabled by server environment')
+
+    return true
+  }
+
   const formOptions: MailgunMessageData = {
     from: `Muscle to Movement <noreply@${EMAIL_SENDER_DOMAIN}>`,
     ...data,

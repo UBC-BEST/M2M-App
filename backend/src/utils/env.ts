@@ -32,12 +32,12 @@ export const REFRESH_TOKEN_EXPIRY = env
   .default('90d')
   .asString() as StringValue
 
-export const EMAIL_TOKEN_SECRET = env
-  .get('EMAIL_TOKEN_SECRET')
+export const LINK_TOKEN_SECRET = env
+  .get('LINK_TOKEN_SECRET')
   .required()
   .asString()
-export const EMAIL_TOKEN_EXPIRY = env
-  .get('EMAIL_TOKEN_EXPIRY')
+export const LINK_TOKEN_EXPIRY = env
+  .get('LINK_TOKEN_EXPIRY')
   .default('7d')
   .asString() as StringValue
 export const EMAIL_SENDER_DOMAIN = env

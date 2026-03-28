@@ -1,7 +1,6 @@
 import { RequestHandler } from 'express'
-import { dbLinkTokens, dbUsers } from '../../utils/database'
-import { NotFoundError, ServiceUnavailableError } from '../../utils/errors'
-import { generateEmailToken } from '../../utils/tokens'
+import { ServiceUnavailableError } from '../../utils/errors'
+import { generateLinkToken } from '../../utils/tokens'
 import { loadTemplate, sendEmail, useTemplate } from '../../utils/email'
 import { CLIENT_URL } from '../../utils/env'
 
@@ -9,24 +8,7 @@ const loginLinkForm = loadTemplate('loginLinkEmail')
 
 export const sendLoginLink: RequestHandler = async (req, res) => {
   const { email } = req.body
-
-  const user = await dbUsers.findOne({ email })
-  if (!user) {
-    throw new NotFoundError('No account associated with this email')
-  }
-
-  // Make sure no duplicate login links exist in the system
-  await dbLinkTokens.findOneAndDelete({ email, type: 'login_link' })
-
-  const { token, createdAt, expiresAt } = await generateEmailToken()
-  await dbLinkTokens.insertOne({
-    userId: user._id,
-    email,
-    token,
-    createdAt,
-    expiresAt,
-    type: 'login_link',
-  })
+  const token = await generateLinkToken(email, 'login_link')
 
   const success = await sendEmail({
     to: [email],

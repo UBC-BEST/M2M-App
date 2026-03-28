@@ -2,8 +2,12 @@ import { RequestHandler } from 'express'
 import { CLIENT_URL } from '../../utils/env'
 import { dbUsers, dbLinkTokens } from '../../utils/database'
 import { loadTemplate, sendEmail, useTemplate } from '../../utils/email'
-import { NotFoundError, ServiceUnavailableError } from '../../utils/errors'
-import { generateEmailToken, validateAccessToken } from '../../utils/tokens'
+import {
+  ForbiddenError,
+  NotFoundError,
+  ServiceUnavailableError,
+} from '../../utils/errors'
+import { generateLinkToken, validateAccessToken } from '../../utils/tokens'
 
 const verifyEmailForm = loadTemplate('verifyLinkEmail')
 
@@ -24,18 +28,11 @@ export const sendEmailVerifyLink: RequestHandler = async (req, res) => {
     throw new NotFoundError('Email not associated with specified user')
   }
 
-  // Make sure no duplicate verification codes exist in the system
-  await dbLinkTokens.findOneAndDelete({ email, type: 'email_verify' })
+  if (user.verified) {
+    throw new ForbiddenError('User email has already been verified')
+  }
 
-  const { token, createdAt, expiresAt } = await generateEmailToken()
-  await dbLinkTokens.insertOne({
-    userId,
-    email,
-    token,
-    createdAt,
-    expiresAt,
-    type: 'email_verify',
-  })
+  const token = await generateLinkToken(email, 'email_verify')
 
   const success = await sendEmail({
     to: [email],

@@ -1,28 +1,15 @@
 import { RequestHandler } from 'express'
-import { dbUsers, dbLinkTokens } from '../../../utils/database'
-import jwt from 'jsonwebtoken'
-import { EMAIL_TOKEN_SECRET } from '../../../utils/env'
-import { ForbiddenError, NotFoundError } from '../../../utils/errors'
-import { generateAccessToken, useRefreshToken } from '../../../utils/tokens'
+import { dbUsers } from '../../../utils/database'
+import {
+  generateAccessToken,
+  useRefreshToken,
+  validateLinkToken,
+} from '../../../utils/tokens'
 
 export const applyEmailVerifyLink: RequestHandler = async (req, res) => {
   const { token } = req.body
 
-  // Delete on retrieval since tokens are single use
-  const tokenData = await dbLinkTokens.findOneAndDelete({
-    type: 'email_verify',
-    token,
-  })
-
-  if (!tokenData) {
-    throw new NotFoundError('Invalid or revoked email verification token')
-  }
-
-  try {
-    jwt.verify(token, EMAIL_TOKEN_SECRET)
-  } catch (error) {
-    throw new ForbiddenError('Malformed or expired email verification token')
-  }
+  const tokenData = await validateLinkToken(token, 'email_verify')
 
   // All checks passed: verify user email
   await dbUsers.updateOne(

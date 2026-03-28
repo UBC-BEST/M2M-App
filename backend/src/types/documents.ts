@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb'
 import { AuthenticatorTransportFuture } from '@simplewebauthn/server'
+import { LinkTokenType } from './tokens'
 
 export type RefreshTokenDocument = {
   userId: ObjectId
@@ -13,7 +14,7 @@ export type LinkTokenDocument = {
   token: string
   createdAt: number
   expiresAt: number
-  type: 'email_verify' | 'login_link'
+  type: LinkTokenType
 }
 
 export type UserDocument = {

@@ -10,8 +10,4 @@ export type RefreshTokenPayload = {
   value: string
 }
 
-export type VerifyTokenPayload = {
-  userId: ObjectId
-  email: string
-  value: string
-}
+export type LinkTokenType = 'email_verify' | 'login_link'
