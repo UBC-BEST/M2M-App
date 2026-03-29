@@ -3,17 +3,23 @@ import jwt from 'jsonwebtoken'
 import {
   ACCESS_TOKEN_EXPIRY,
   ACCESS_TOKEN_SECRET,
+  LINK_TOKEN_EXPIRY,
+  LINK_TOKEN_SECRET,
   IS_PRODUCTION,
   REFRESH_TOKEN_EXPIRY,
   REFRESH_TOKEN_SECRET,
 } from './env'
 import { ObjectId } from 'mongodb'
 import { CookieOptions, Request, Response } from 'express'
-import { dbRefreshTokens } from './database'
+import { dbLinkTokens, dbRefreshTokens, dbUsers } from './database'
 import ms from 'ms'
 import { DateTime } from 'luxon'
-import { BadRequestError, ForbiddenError } from './errors'
-import { AccessTokenPayload, RefreshTokenPayload } from '../types/tokens'
+import { BadRequestError, ForbiddenError, NotFoundError } from './errors'
+import {
+  AccessTokenPayload,
+  LinkTokenType,
+  RefreshTokenPayload,
+} from '../types/tokens'
 
 export const refreshTokenOptions: CookieOptions = {
   httpOnly: true, // Not readable by client scripts (OAuth2 compliant)
@@ -37,15 +43,15 @@ export const generateAccessToken = (userId: ObjectId): string => {
  */
 export const validateAccessToken = (req: Request): AccessTokenPayload => {
   // Access token is retrieved from header `Authorization: Bearer <TOKEN>`
-  const tokenString = req.headers['authorization']?.split(' ').at(1)
+  const encodedToken = req.headers['authorization']?.split(' ').at(1)
 
-  if (!tokenString) {
+  if (!encodedToken) {
     throw new BadRequestError('No access token provided')
   }
 
   try {
     const jwtResult = jwt.verify(
-      tokenString,
+      encodedToken,
       ACCESS_TOKEN_SECRET
     ) as AccessTokenPayload
 
@@ -107,4 +113,57 @@ export const useRefreshToken = async (userId: ObjectId, res: Response) => {
     ...refreshTokenOptions,
     maxAge: ms(REFRESH_TOKEN_EXPIRY),
   })
+}
+
+/**
+ * Generates a token for use in link emails and adjusts database as required
+ */
+export const generateLinkToken = async (email: string, type: LinkTokenType) => {
+  const user = await dbUsers.findOne({ email })
+  if (!user) {
+    throw new NotFoundError('No account associated with this email')
+  }
+
+  // Make sure no duplicate login links exist in the system
+  await dbLinkTokens.findOneAndDelete({ email, type })
+
+  // Use a randomized payload to ensure length and uniqueness of JWT
+  const payload = randomBytes(16).toString('hex')
+  const token = jwt.sign(payload, LINK_TOKEN_SECRET, {
+    expiresIn: LINK_TOKEN_EXPIRY,
+  })
+
+  const createdAt = DateTime.now().toUnixInteger()
+  const expiresAt = DateTime.now().plus(ms(LINK_TOKEN_EXPIRY)).toUnixInteger()
+
+  await dbLinkTokens.insertOne({
+    userId: user._id,
+    email,
+    token,
+    createdAt,
+    expiresAt,
+    type: 'login_link',
+  })
+
+  return token
+}
+
+/**
+ * Validates given link token and deletes it from the database
+ */
+export const validateLinkToken = async (token: string, type: LinkTokenType) => {
+  // Delete on retrieval since tokens are single use
+  const tokenData = await dbLinkTokens.findOneAndDelete({ type, token })
+
+  if (!tokenData) {
+    throw new NotFoundError('Invalid or revoked link token')
+  }
+
+  try {
+    jwt.verify(token, LINK_TOKEN_SECRET)
+  } catch (error) {
+    throw new ForbiddenError('Malformed or expired link token')
+  }
+
+  return tokenData
 }

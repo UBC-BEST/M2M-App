@@ -9,3 +9,5 @@ export type RefreshTokenPayload = {
   /** Randomly generated filler string used to ensure token uniqueness */
   value: string
 }
+
+export type LinkTokenType = 'email_verify' | 'login_link'

@@ -1,0 +1,49 @@
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.content-card {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  background-color: #f4f7fb !important;
+  color: #1f2937 !important;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  width: 100%;
+  max-width: 600px;
+  margin: 60px auto;
+  table-layout: fixed;
+}
+
+.content-card tr {
+  text-align: center;
+}
+
+.content-card tr td * {
+  margin: 0 !important;
+  box-sizing: border-box;
+}
+
+.content-card tr td h1 {
+  padding-bottom: 8px;
+  font-size: 32px;
+}
+
+.action-button-wrapper {
+  padding: 20px 0;
+}
+
+.action-button {
+  font-size: 20px;
+  color: #ffffff !important;
+  background-color: #2563eb !important;
+  text-decoration: none;
+  align-self: center;
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+
+.action-button:hover {
+  background-color: #1d4ed8 !important;
+}
