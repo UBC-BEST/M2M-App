@@ -30,6 +30,8 @@
 	<string>Requires biometrics to secure user data</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Uses Bluetooth to read FSR values from the ESP32.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>Uses Bluetooth to discover and connect to your training device.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
