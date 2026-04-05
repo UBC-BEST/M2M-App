@@ -31,7 +31,7 @@ class GamesPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               SizedBox(
-                height: 150,
+                height: 178,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: games.length,
@@ -40,29 +40,45 @@ class GamesPage extends StatelessWidget {
                     return GestureDetector(
                       onTap: game.onTap,
                       child: Container(
-                        width: 150,
+                        width: 170,
                         margin: const EdgeInsets.symmetric(horizontal: 8),
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: Colors.blue.shade300,
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: [
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: <BoxShadow>[
                             BoxShadow(
-                              color: Colors.grey.withValues(alpha: 0.5),
+                              color: Colors.grey.withValues(alpha: 0.45),
                               blurRadius: 5,
                               offset: const Offset(2, 2),
                             ),
                           ],
                         ),
-                        child: Center(
-                          child: Text(
-                            game.name,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              game.name,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
+                            const Spacer(),
+                            Text(
+                              game.subtitle ?? 'Tap to launch',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     );

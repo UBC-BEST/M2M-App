@@ -8,11 +8,13 @@ class AppConfig {
   static const _ipKey = 'FLUTTER_APP_EXP_IP';
   static const _portKey = 'FLUTTER_APP_EXP_PORT';
   static const _bleServiceUuidKey = 'FLUTTER_APP_BLE_SERVICE_UUID';
-  static const _bleCharacteristicUuidKey = 'FLUTTER_APP_BLE_CHARACTERISTIC_UUID';
+  static const _bleCharacteristicUuidKey =
+      'FLUTTER_APP_BLE_CHARACTERISTIC_UUID';
   static const _bypassAuthKey = 'FLUTTER_APP_BYPASS_AUTH';
+  static const _allowGameLaunchWithoutSensorKey =
+      'FLUTTER_APP_ALLOW_GAME_LAUNCH_WITHOUT_SENSOR';
 
-  static const _defaultBleServiceUuid =
-      '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+  static const _defaultBleServiceUuid = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
   static const _defaultBleCharacteristicUuid =
       '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
 
@@ -63,9 +65,19 @@ class AppConfig {
   /// When `true` (set `FLUTTER_APP_BYPASS_AUTH=true` in `.env`), the app stores a
   /// local placeholder token so you can open the UI without a running backend.
   static bool get bypassAuth {
-    final v = _read(_bypassAuthKey)?.toLowerCase();
-    return v == 'true' || v == '1' || v == 'yes';
+    return _readBool(_bypassAuthKey);
+  }
+
+  /// When `true`, allows launching Unity games without sensor connection/preset
+  /// checks. Intended only for local development and testing.
+  static bool get allowGameLaunchWithoutSensor {
+    return _readBool(_allowGameLaunchWithoutSensorKey);
   }
 
   static String? _read(String key) => dotenv.env[key]?.trim();
+
+  static bool _readBool(String key) {
+    final v = _read(key)?.toLowerCase();
+    return v == 'true' || v == '1' || v == 'yes';
+  }
 }

@@ -27,6 +27,7 @@ FLUTTER_APP_EXP_IP=your_computer_ip_or_localhost
 FLUTTER_APP_EXP_PORT=6969
 FLUTTER_APP_BLE_SERVICE_UUID=6e400001-b5a3-f393-e0a9-e50e24dcca9e
 FLUTTER_APP_BLE_CHARACTERISTIC_UUID=6e400002-b5a3-f393-e0a9-e50e24dcca9e
+FLUTTER_APP_ALLOW_GAME_LAUNCH_WITHOUT_SENSOR=false
 ```
 
 `FLUTTER_APP_BASE_URL` is optional. If you leave it empty, the app will build the backend URL from `FLUTTER_APP_EXP_IP` and `FLUTTER_APP_EXP_PORT`.
@@ -35,6 +36,7 @@ FLUTTER_APP_BLE_CHARACTERISTIC_UUID=6e400002-b5a3-f393-e0a9-e50e24dcca9e
 
 - `FLUTTER_APP_BLE_SERVICE_UUID`: The BLE service UUID advertised by the ESP32. The app uses this to find and verify the correct device during scanning and after connection.
 - `FLUTTER_APP_BLE_CHARACTERISTIC_UUID`: The BLE characteristic UUID used for READ + NOTIFY to receive the 2-byte FSR ADC values.
+- `FLUTTER_APP_ALLOW_GAME_LAUNCH_WITHOUT_SENSOR`: Set to `true` for local development to launch Unity games without BLE sensor connection and calibration preset checks.
 
 #### 🔍 How to find your IP address:
 

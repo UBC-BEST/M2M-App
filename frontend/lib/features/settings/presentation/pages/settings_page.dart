@@ -9,6 +9,7 @@ import '../widgets/settings_tile.dart';
 import 'account_settings.dart';
 import 'appearance_settings.dart';
 import 'bluetooth_device_page.dart';
+import 'game_sensor_calibration_page.dart';
 import 'notifications_settings.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -131,6 +132,17 @@ class _SettingsPageState extends State<SettingsPage> {
                 );
                 await _loadBluetoothSelection();
               },
+            ),
+            SettingsTile(
+              icon: Icons.sports_esports_outlined,
+              title: 'Game sensor presets',
+              subtitle: 'Per-game thresholds and sensitivity',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (context) => const GameSensorCalibrationPage(),
+                ),
+              ),
             ),
             SwitchListTile(
               title: Text(localizations.loginWithFaceId),

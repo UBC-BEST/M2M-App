@@ -8,4 +8,5 @@ class StorageKeys {
   static const String faceIdPassword = 'faceIdPassword';
   static const String bluetoothDeviceId = 'bluetoothDeviceId';
   static const String bluetoothDeviceName = 'bluetoothDeviceName';
+  static const String gameCalibrationPrefix = 'gameCalibration:';
 }

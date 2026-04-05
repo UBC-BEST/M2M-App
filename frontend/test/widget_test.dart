@@ -1,25 +1,45 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:m2m/features/games/domain/game_item.dart';
+import 'package:m2m/features/games/presentation/games_page.dart';
+import 'package:flutter/material.dart';
+import 'package:m2m/l10n/app_localizations.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  testWidgets('games page renders and handles tap',
+      (WidgetTester tester) async {
+    var tapped = false;
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpWidget(
+      TestApp(
+        games: <GameItem>[
+          GameItem(
+            id: 'pizza',
+            name: 'Pizza Game',
+            subtitle: 'Tap to launch',
+            onTap: () => tapped = true,
+          ),
+        ],
+      ),
+    );
+
+    expect(find.text('Pizza Game'), findsOneWidget);
+    await tester.tap(find.text('Pizza Game'));
     await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(tapped, isTrue);
   });
+}
+
+class TestApp extends StatelessWidget {
+  const TestApp({super.key, required this.games});
+
+  final List<GameItem> games;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: GamesPage(games: games),
+    );
+  }
 }

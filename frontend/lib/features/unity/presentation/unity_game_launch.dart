@@ -1,110 +1,240 @@
-// import 'package:flutter/material.dart';
-// import 'package:flutter/services.dart';
-// import 'package:flutter_unity_widget/flutter_unity_widget.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_unity_widget/flutter_unity_widget.dart';
 
-// class FullScreenUnityGame extends StatefulWidget {
-//   final String gameName;
+import '../application/sensor_game_bridge.dart';
+import '../domain/unity_game.dart';
 
-//   const FullScreenUnityGame({super.key, required this.gameName});
+class UnityGameLaunchPage extends StatefulWidget {
+  const UnityGameLaunchPage({
+    super.key,
+    required this.game,
+  });
 
-//   @override
-//   State<FullScreenUnityGame> createState() => _FullScreenUnityGameState();
-// }
+  final UnityGame game;
 
-// class _FullScreenUnityGameState extends State<FullScreenUnityGame> {
-//   UnityWidgetController? _unityWidgetController;
+  @override
+  State<UnityGameLaunchPage> createState() => _UnityGameLaunchPageState();
+}
 
-//   @override
-//   void initState() {
-//     super.initState();
+class _UnityGameLaunchPageState extends State<UnityGameLaunchPage> {
+  final SensorGameBridge _bridge = SensorGameBridge.instance;
 
-//     // Locks the orientation to landscape when entering the game
-//     SystemChrome.setPreferredOrientations([
-//       DeviceOrientation.landscapeLeft,
-//       DeviceOrientation.landscapeRight,
-//     ]);
+  @override
+  void initState() {
+    super.initState();
+    _enterImmersiveLandscape();
+    _bridge.addListener(_onBridgeUpdate);
+    _bootstrap();
+  }
 
-//     // Hide the status bar and navigation bar
-//     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-//   }
+  Future<void> _bootstrap() async {
+    await _bridge.ensureInitialized();
+    await _bridge.startSession(widget.game);
+  }
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: Stack(
-//         children: [
-//           // Unity Game
-//           Positioned.fill(
-//             child: UnityWidget(
-//               onUnityCreated: onUnityCreated,
-//               onUnityUnloaded: onUnityUnloaded,
-//               onUnityMessage: onUnityMessage,
-//             ),
-//           ),
-//           // Black Bar with Close Button
-//           Positioned(
-//             top: 0,
-//             left: 0,
-//             right: 0,
-//             child: Container(
-//               color: Colors.black,
-//               height: 50, // Height of the black bar
-//               child: Row(
-//                 mainAxisAlignment: MainAxisAlignment.end,
-//                 children: [
-//                   IconButton(
-//                     icon: const Icon(Icons.close, color: Colors.white),
-//                     onPressed: _exitGame,
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
+  Future<void> _enterImmersiveLandscape() async {
+    await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  }
 
-//   // Callback to initialize Unity controller
-//   void onUnityCreated(UnityWidgetController controller) {
-//     _unityWidgetController = controller;
+  Future<void> _restorePortraitSystemUi() async {
+    await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  }
 
-//     // Pass the game name to Unity to load the correct scene
-//     // (josh) Not sure how this will work. Hoping that it will help us navicate between games
-//     _unityWidgetController?.postMessage(
-//       'GameManager', // Unity GameObject name
-//       'LoadGame', // Unity method
-//       widget.gameName,
-//     );
-//   }
+  void _onBridgeUpdate() {
+    if (!mounted) return;
+    setState(() {});
+  }
 
-//   void onUnityMessage(dynamic message) {
-//     debugPrint("Unity Message: $message");
-//   }
+  void _onUnityCreated(UnityWidgetController controller) {
+    _bridge.attachController(controller);
+  }
 
-//   void onUnityUnloaded() {
-//     debugPrint("Unity has been unloaded!");
-//   }
+  void _onUnityMessage(dynamic message) {
+    _bridge.onUnityMessage(message);
+  }
 
-//   void _exitGame() {
-//     // Restore orientation and UI when exiting the game
-//     SystemChrome.setPreferredOrientations([
-//       DeviceOrientation.portraitUp,
-//       DeviceOrientation.portraitDown,
-//     ]);
-//     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  void _onUnityUnloaded() {
+    _bridge.detachController();
+  }
 
-//     Navigator.pop(context);
-//   }
+  Future<void> _closeGame() async {
+    _bridge.stopSession();
+    await _restorePortraitSystemUi();
+    if (!mounted) return;
+    Navigator.of(context).pop();
+  }
 
-//   @override
-//   void dispose() {
-//     // Restore orientation and UI on dispose
-//     SystemChrome.setPreferredOrientations([
-//       DeviceOrientation.portraitUp,
-//       DeviceOrientation.portraitDown,
-//     ]);
-//     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-//     super.dispose();
-//   }
-// }
+  @override
+  void dispose() {
+    _bridge.removeListener(_onBridgeUpdate);
+    _bridge.stopSession();
+    _restorePortraitSystemUi();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (kIsWeb) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(widget.game.displayName),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              const Icon(
+                Icons.web_asset_off_outlined,
+                size: 40,
+                color: Colors.orange,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Unity games are not supported on Flutter Web in this build.',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Use an Android or iOS target to run the embedded Unity game.',
+                style: TextStyle(fontSize: 15),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Current game: ${widget.game.displayName}',
+                style: const TextStyle(fontSize: 14, color: Colors.black54),
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.arrow_back),
+                label: const Text('Back to Games'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final isConnected = _bridge.isSensorConnected;
+    final status = _bridge.status;
+    final sensorValue = _bridge.currentSensorPercent.toStringAsFixed(1);
+
+    return Scaffold(
+      body: Stack(
+        children: <Widget>[
+          Positioned.fill(
+            child: UnityWidget(
+              onUnityCreated: _onUnityCreated,
+              onUnityUnloaded: _onUnityUnloaded,
+              onUnityMessage: _onUnityMessage,
+            ),
+          ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                margin: const EdgeInsets.all(12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.75),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Text(
+                            widget.game.displayName,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            status,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    _StatusPill(
+                      label: isConnected
+                          ? 'Sensor $sensorValue%'
+                          : 'Sensor offline',
+                      ok: isConnected,
+                    ),
+                    const SizedBox(width: 8),
+                    _StatusPill(
+                      label:
+                          _bridge.unityReady ? 'Unity ready' : 'Unity loading',
+                      ok: _bridge.unityReady,
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: _closeGame,
+                      icon: const Icon(Icons.close, color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusPill extends StatelessWidget {
+  const _StatusPill({
+    required this.label,
+    required this.ok,
+  });
+
+  final String label;
+  final bool ok;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: ok ? const Color(0xFF16A34A) : const Color(0xFFDC2626),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
