@@ -61,8 +61,7 @@ import 'app_localizations_en.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -70,8 +69,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -83,8 +81,7 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -92,7 +89,9 @@ abstract class AppLocalizations {
   ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('en')];
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en')
+  ];
 
   /// No description provided for @title.
   ///
@@ -403,8 +402,14 @@ abstract class AppLocalizations {
   /// No description provided for @statsPageTitle.
   ///
   /// In en, this message translates to:
-  /// **'Track Your Progress'**
+  /// **'Data'**
   String get statsPageTitle;
+
+  /// No description provided for @statsPagePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Stats coming soon'**
+  String get statsPagePlaceholder;
 
   /// No description provided for @trainingSelectionTitle.
   ///
@@ -549,10 +554,447 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'See improvements over time and celebrate every milestone.'**
   String get onboardingProgressDescription;
+
+  /// No description provided for @calibrationSettingsEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Rehabilitation calibration'**
+  String get calibrationSettingsEntry;
+
+  /// No description provided for @calibrationRehabTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rehabilitation Calibration'**
+  String get calibrationRehabTitle;
+
+  /// No description provided for @calibrationTherapyGamepadSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s calibrate your therapy gamepad'**
+  String get calibrationTherapyGamepadSubtitle;
+
+  /// No description provided for @calibrationBeforeWeBegin.
+  ///
+  /// In en, this message translates to:
+  /// **'Before We Begin'**
+  String get calibrationBeforeWeBegin;
+
+  /// No description provided for @calibrationBeforeWeBeginBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This calibration will measure your current range of motion and strength'**
+  String get calibrationBeforeWeBeginBody;
+
+  /// No description provided for @calibrationDailyBaseline.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Baseline'**
+  String get calibrationDailyBaseline;
+
+  /// No description provided for @calibrationDailyBaselineBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll establish your daily maximum and minimum ranges'**
+  String get calibrationDailyBaselineBody;
+
+  /// No description provided for @calibrationFourQuickTests.
+  ///
+  /// In en, this message translates to:
+  /// **'4 Quick Tests'**
+  String get calibrationFourQuickTests;
+
+  /// No description provided for @calibrationFourQuickTestsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Grip strength, wrist flexion, extension, and rotation'**
+  String get calibrationFourQuickTestsBody;
+
+  /// No description provided for @calibrationAtYourPace.
+  ///
+  /// In en, this message translates to:
+  /// **'At Your Pace'**
+  String get calibrationAtYourPace;
+
+  /// No description provided for @calibrationAtYourPaceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Move only as far as comfortable. Stop if you feel pain'**
+  String get calibrationAtYourPaceBody;
+
+  /// No description provided for @calibrationImportantCallout.
+  ///
+  /// In en, this message translates to:
+  /// **'Important: Only perform movements that are comfortable. This is not a stress test. Consult your therapist if unsure.'**
+  String get calibrationImportantCallout;
+
+  /// No description provided for @calibrationStartCalibration.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Calibration'**
+  String get calibrationStartCalibration;
+
+  /// No description provided for @calibrationConnectGamepad.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Gamepad'**
+  String get calibrationConnectGamepad;
+
+  /// No description provided for @calibrationConnectGamepadHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ensure your device is powered on and nearby'**
+  String get calibrationConnectGamepadHint;
+
+  /// No description provided for @calibrationSensorStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensor Status'**
+  String get calibrationSensorStatus;
+
+  /// No description provided for @calibrationSensorStatusHint.
+  ///
+  /// In en, this message translates to:
+  /// **'All sensors must be connected to proceed'**
+  String get calibrationSensorStatusHint;
+
+  /// No description provided for @calibrationSensorGrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Grip Sensor'**
+  String get calibrationSensorGrip;
+
+  /// No description provided for @calibrationSensorFlexion.
+  ///
+  /// In en, this message translates to:
+  /// **'Flexion Sensor'**
+  String get calibrationSensorFlexion;
+
+  /// No description provided for @calibrationSensorExtension.
+  ///
+  /// In en, this message translates to:
+  /// **'Extension Sensor'**
+  String get calibrationSensorExtension;
+
+  /// No description provided for @calibrationSensorRotation.
+  ///
+  /// In en, this message translates to:
+  /// **'Rotation Sensor'**
+  String get calibrationSensorRotation;
+
+  /// No description provided for @calibrationConnectSensors.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Sensors'**
+  String get calibrationConnectSensors;
+
+  /// No description provided for @calibrationExercisesHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Calibration Exercises'**
+  String get calibrationExercisesHeading;
+
+  /// No description provided for @calibrationExercisesSubheading.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll guide you through 4 simple movements'**
+  String get calibrationExercisesSubheading;
+
+  /// No description provided for @calibrationWhatToExpect.
+  ///
+  /// In en, this message translates to:
+  /// **'What to Expect'**
+  String get calibrationWhatToExpect;
+
+  /// No description provided for @calibrationWhatToExpectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Each exercise takes 10-15 seconds'**
+  String get calibrationWhatToExpectHint;
+
+  /// No description provided for @calibrationListGripTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Grip Strength'**
+  String get calibrationListGripTitle;
+
+  /// No description provided for @calibrationListGripBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Squeeze as hard as comfortable, then release completely'**
+  String get calibrationListGripBody;
+
+  /// No description provided for @calibrationListFlexionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'2. Wrist Flexion'**
+  String get calibrationListFlexionTitle;
+
+  /// No description provided for @calibrationListFlexionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Bend wrist forward, hold briefly, then return to neutral'**
+  String get calibrationListFlexionBody;
+
+  /// No description provided for @calibrationListExtensionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'3. Wrist Extension'**
+  String get calibrationListExtensionTitle;
+
+  /// No description provided for @calibrationListExtensionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Bend wrist backward, hold briefly, then return to neutral'**
+  String get calibrationListExtensionBody;
+
+  /// No description provided for @calibrationListRotationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'4. Wrist Rotation'**
+  String get calibrationListRotationTitle;
+
+  /// No description provided for @calibrationListRotationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate wrist slowly through full range of motion'**
+  String get calibrationListRotationBody;
+
+  /// No description provided for @calibrationRememberHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember:'**
+  String get calibrationRememberHeading;
+
+  /// No description provided for @calibrationRemember1.
+  ///
+  /// In en, this message translates to:
+  /// **'Move only within your comfortable range'**
+  String get calibrationRemember1;
+
+  /// No description provided for @calibrationRemember2.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop immediately if you feel pain'**
+  String get calibrationRemember2;
+
+  /// No description provided for @calibrationRemember3.
+  ///
+  /// In en, this message translates to:
+  /// **'Take breaks between exercises if needed'**
+  String get calibrationRemember3;
+
+  /// No description provided for @calibrationRemember4.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow the on-screen visual guidance'**
+  String get calibrationRemember4;
+
+  /// No description provided for @calibrationStartFirstExercise.
+  ///
+  /// In en, this message translates to:
+  /// **'Start First Exercise'**
+  String get calibrationStartFirstExercise;
+
+  /// No description provided for @calibrationExerciseOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercise {current} of {total}'**
+  String calibrationExerciseOf(int current, int total);
+
+  /// No description provided for @calibrationExerciseGripTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Grip Strength'**
+  String get calibrationExerciseGripTitle;
+
+  /// No description provided for @calibrationExerciseGripInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Squeeze the gamepad as hard as you can, then release completely'**
+  String get calibrationExerciseGripInstruction;
+
+  /// No description provided for @calibrationExerciseGripTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Squeeze and hold for 3 seconds, then release'**
+  String get calibrationExerciseGripTip;
+
+  /// No description provided for @calibrationExerciseFlexionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrist Flexion'**
+  String get calibrationExerciseFlexionTitle;
+
+  /// No description provided for @calibrationExerciseFlexionInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Bend your wrist forward as far as comfortable, then return to neutral'**
+  String get calibrationExerciseFlexionInstruction;
+
+  /// No description provided for @calibrationExerciseFlexionTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold the end position for 3 seconds, then relax'**
+  String get calibrationExerciseFlexionTip;
+
+  /// No description provided for @calibrationExerciseExtensionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrist Extension'**
+  String get calibrationExerciseExtensionTitle;
+
+  /// No description provided for @calibrationExerciseExtensionInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Bend your wrist backward as far as comfortable, then return to neutral'**
+  String get calibrationExerciseExtensionInstruction;
+
+  /// No description provided for @calibrationExerciseExtensionTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold the end position for 3 seconds, then relax'**
+  String get calibrationExerciseExtensionTip;
+
+  /// No description provided for @calibrationExerciseRotationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrist Rotation'**
+  String get calibrationExerciseRotationTitle;
+
+  /// No description provided for @calibrationExerciseRotationInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate your wrist slowly through your full comfortable range'**
+  String get calibrationExerciseRotationInstruction;
+
+  /// No description provided for @calibrationExerciseRotationTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete 2 slow rotations, then rest'**
+  String get calibrationExerciseRotationTip;
+
+  /// No description provided for @calibrationBeginExercise.
+  ///
+  /// In en, this message translates to:
+  /// **'Begin Exercise'**
+  String get calibrationBeginExercise;
+
+  /// No description provided for @calibrationCountdownPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Get ready…'**
+  String get calibrationCountdownPreparing;
+
+  /// No description provided for @calibrationExerciseComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercise complete'**
+  String get calibrationExerciseComplete;
+
+  /// No description provided for @calibrationContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get calibrationContinue;
+
+  /// No description provided for @calibrationCompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Calibration Complete!'**
+  String get calibrationCompleteTitle;
+
+  /// No description provided for @calibrationCompleteSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your daily baseline has been established'**
+  String get calibrationCompleteSubtitle;
+
+  /// No description provided for @calibrationSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Calibration Summary'**
+  String get calibrationSummaryTitle;
+
+  /// No description provided for @calibrationSessionCompletedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Session completed on {date}'**
+  String calibrationSessionCompletedOn(String date);
+
+  /// No description provided for @calibrationSummaryExercises.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercises'**
+  String get calibrationSummaryExercises;
+
+  /// No description provided for @calibrationSummaryDataPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Points'**
+  String get calibrationSummaryDataPoints;
+
+  /// No description provided for @calibrationExerciseResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercise Results'**
+  String get calibrationExerciseResults;
+
+  /// No description provided for @calibrationNextSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Steps'**
+  String get calibrationNextSteps;
+
+  /// No description provided for @calibrationNextStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Your gamepad is now calibrated to your current abilities'**
+  String get calibrationNextStep1;
+
+  /// No description provided for @calibrationNextStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'These measurements will be used as your daily baseline'**
+  String get calibrationNextStep2;
+
+  /// No description provided for @calibrationNextStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'Recalibrate daily for best results'**
+  String get calibrationNextStep3;
+
+  /// No description provided for @calibrationNextStep4.
+  ///
+  /// In en, this message translates to:
+  /// **'Share this data with your therapist for progress tracking'**
+  String get calibrationNextStep4;
+
+  /// No description provided for @calibrationExportData.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Calibration Data'**
+  String get calibrationExportData;
+
+  /// No description provided for @calibrationReturnHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to Home'**
+  String get calibrationReturnHome;
+
+  /// No description provided for @calibrationExportComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Export will be available in a future update.'**
+  String get calibrationExportComingSoon;
+
+  /// No description provided for @calibrationConnectingSensors.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting…'**
+  String get calibrationConnectingSensors;
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -561,23 +1003,24 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en':
-      return AppLocalizationsEn();
+    case 'en': return AppLocalizationsEn();
   }
 
   throw FlutterError(
-      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.'
+  );
 }

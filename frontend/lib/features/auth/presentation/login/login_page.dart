@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:m2m/l10n/app_localizations.dart';
+import 'package:m2m/core/config/app_config.dart';
+import 'package:m2m/core/constants/dev_auth.dart';
 import 'package:m2m/core/services/session_manager.dart';
 import 'package:m2m/features/auth/data/auth_repository.dart';
 import 'package:m2m/features/auth/presentation/signup/sign_up_page.dart';
@@ -75,6 +77,15 @@ class _LoginPageState extends State<LoginPage> {
         setState(() => _isSubmitting = false);
       }
     }
+  }
+
+  Future<void> _handleBypassLogin() async {
+    await _sessionManager.saveAccessToken(kDevBypassAccessToken);
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const NavigationShell()),
+    );
   }
 
   Future<void> _maybeEnableFaceId(String email, String password) async {
@@ -198,6 +209,13 @@ class _LoginPageState extends State<LoginPage> {
                         },
                         child: Text(localizations.dontHaveAccount),
                       ),
+                      if (AppConfig.bypassAuth) ...[
+                        const SizedBox(height: 16),
+                        TextButton(
+                          onPressed: _isSubmitting ? null : _handleBypassLogin,
+                          child: const Text('Continue without backend'),
+                        ),
+                      ],
                     ],
                   ),
                 ),

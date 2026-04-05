@@ -3,6 +3,7 @@ import 'package:m2m/core/services/bluetooth_device_manager.dart';
 import 'package:m2m/l10n/app_localizations.dart';
 import 'package:m2m/core/services/session_manager.dart';
 import 'package:m2m/features/auth/presentation/login/login_page.dart';
+import 'package:m2m/features/calibration/presentation/calibration_flow_page.dart';
 
 import '../widgets/settings_tile.dart';
 import 'account_settings.dart';
@@ -103,6 +104,19 @@ class _SettingsPageState extends State<SettingsPage> {
                   builder: (context) => const AppearanceSettings(),
                 ),
               ),
+            ),
+            SettingsTile(
+              icon: Icons.tune,
+              title: localizations.calibrationSettingsEntry,
+              subtitle: localizations.calibrationTitle,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (context) => const CalibrationFlowPage(),
+                  ),
+                );
+              },
             ),
             SettingsTile(
               icon: Icons.bluetooth_searching,

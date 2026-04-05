@@ -9,6 +9,7 @@ class AppConfig {
   static const _portKey = 'FLUTTER_APP_EXP_PORT';
   static const _bleServiceUuidKey = 'FLUTTER_APP_BLE_SERVICE_UUID';
   static const _bleCharacteristicUuidKey = 'FLUTTER_APP_BLE_CHARACTERISTIC_UUID';
+  static const _bypassAuthKey = 'FLUTTER_APP_BYPASS_AUTH';
 
   static const _defaultBleServiceUuid =
       '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
@@ -59,6 +60,12 @@ class AppConfig {
         : _defaultBleCharacteristicUuid;
   }
 
+  /// When `true` (set `FLUTTER_APP_BYPASS_AUTH=true` in `.env`), the app stores a
+  /// local placeholder token so you can open the UI without a running backend.
+  static bool get bypassAuth {
+    final v = _read(_bypassAuthKey)?.toLowerCase();
+    return v == 'true' || v == '1' || v == 'yes';
+  }
 
   static String? _read(String key) => dotenv.env[key]?.trim();
 }
