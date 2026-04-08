@@ -1,157 +1,274 @@
 import 'package:flutter/material.dart';
 import 'package:m2m/l10n/app_localizations.dart';
 
-import 'widgets/recommended_card.dart';
-import 'widgets/wide_card.dart';
-
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     const userName = 'Jane';
-    final theme = Theme.of(context);
     final localizations = AppLocalizations.of(context)!;
 
-    final recommendedCards = _recommendedContent(localizations);
-    final spotlightCards = _spotlightContent(localizations);
-
-    return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-        children: [
-          Text(
-            '${localizations.hello},',
-            style: theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: Colors.black,
-              fontSize: 36,
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFB),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 28),
+          children: [
+            Text(
+              '${localizations.hello},',
+              style: const TextStyle(
+                fontSize: 38,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF475569),
+                height: 1.0,
+              ),
             ),
-          ),
-          Text(
-            userName,
-            style: theme.textTheme.displayLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-              fontSize: 48,
-              height: 0.9,
+            const SizedBox(height: 2),
+            const Text(
+              userName,
+              style: TextStyle(
+                fontSize: 50,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF0F172A),
+                height: 1.0,
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            localizations.recommendedSectionTitle,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: Colors.black,
-              fontSize: 20,
+            const SizedBox(height: 22),
+            Container(
+              height: 48,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x1A000000),
+                    blurRadius: 3,
+                    offset: Offset(0, 1),
+                  ),
+                ],
+              ),
+              child: const Row(
+                children: [
+                  SizedBox(width: 14),
+                  Icon(Icons.search_rounded, color: Color(0xFF94A3B8)),
+                  SizedBox(width: 10),
+                  Text(
+                    'Search exercises...',
+                    style: TextStyle(
+                      color: Color(0xFFCBD5E1),
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 18),
-          SizedBox(
-            height: 215,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: recommendedCards.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 20),
-              itemBuilder: (context, index) {
-                final card = recommendedCards[index];
-                return RecommendedCard(
-                  color: card.color,
-                  icon: card.icon,
-                  title: card.title,
-                  subtitle: card.subtitle,
-                  duration: card.duration,
-                  ctaLabel: localizations.startButtonLabel,
-                );
-              },
+            const SizedBox(height: 22),
+            const Text(
+              'Recommended for you',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF0F172A),
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
-          for (final spotlight in spotlightCards) ...[
-            WideCard(
-              color: spotlight.color,
-              textColor: spotlight.textColor,
-              title: spotlight.title,
-              subtitle: spotlight.subtitle,
+            const SizedBox(height: 16),
+            const Row(
+              children: [
+                Expanded(
+                  child: _HomeExerciseCard(
+                    title: 'Grip Test',
+                    accentColor: Color(0xFF0891B2),
+                    gradientStart: Color(0xFF06B6D4),
+                    gradientEnd: Color(0xFF0891B2),
+                  ),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: _HomeExerciseCard(
+                    title: 'Range Test',
+                    accentColor: Color(0xFF0D9488),
+                    gradientStart: Color(0xFF14B8A6),
+                    gradientEnd: Color(0xFF0D9488),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 20),
+            const Text(
+              "Today's Activities",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF0F172A),
+              ),
+            ),
+            const SizedBox(height: 12),
+            _ActivityCard(
+              title: localizations.dailyWarmupTitle,
+              subtitle: 'STRETCHING • 3-10 MIN',
+              buttonColor: const Color(0xFF06B6D4),
+            ),
+            const SizedBox(height: 12),
+            _ActivityCard(
+              title: localizations.weeklyChallengeTitle,
+              subtitle: 'STRETCHING • 3-10 MIN',
+              buttonColor: const Color(0xFF14B8A6),
+            ),
           ],
-          const SizedBox(height: 32),
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeExerciseCard extends StatelessWidget {
+  const _HomeExerciseCard({
+    required this.title,
+    required this.accentColor,
+    required this.gradientStart,
+    required this.gradientEnd,
+  });
+
+  final String title;
+  final Color accentColor;
+  final Color gradientStart;
+  final Color gradientEnd;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 152,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [gradientStart, gradientEnd],
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x1A000000),
+            blurRadius: 12,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'EXERCISE',
+            style: TextStyle(
+              color: Color(0xE6FFFFFF),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 28,
+              fontWeight: FontWeight.w700,
+              height: 1.0,
+            ),
+          ),
+          const Spacer(),
+          Container(
+            height: 32,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              'START',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: accentColor,
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
-
-  List<_RecommendedContent> _recommendedContent(AppLocalizations localizations) {
-    return [
-      _RecommendedContent(
-        color: const Color(0xFF719E66),
-        icon: Icons.compass_calibration,
-        title: localizations.calibrationTitle,
-        subtitle: localizations.maintenanceLabel,
-        duration: localizations.durationTwoToThreeMinutes,
-      ),
-      _RecommendedContent(
-        color: const Color(0xFFBEB9FF),
-        icon: Icons.spa,
-        title: localizations.gripTestTitle,
-        subtitle: localizations.exerciseLabel,
-        duration: localizations.durationThreeToTenMinutes,
-      ),
-      _RecommendedContent(
-        color: const Color(0xFFA7C8FF),
-        icon: Icons.self_improvement,
-        title: localizations.rangeTestTitle,
-        subtitle: localizations.exerciseLabel,
-        duration: localizations.durationThreeToTenMinutes,
-      ),
-    ];
-  }
-
-  List<_SpotlightContent> _spotlightContent(AppLocalizations localizations) {
-    return [
-      _SpotlightContent(
-        color: const Color(0xFF23232C),
-        textColor: Colors.white,
-        title: localizations.dailyWarmupTitle,
-        subtitle: localizations.dailyWarmupSubtitle,
-      ),
-      _SpotlightContent(
-        color: const Color(0xFFD2F6D3),
-        textColor: Colors.black,
-        title: localizations.weeklyChallengeTitle,
-        subtitle: localizations.weeklyChallengeSubtitle,
-      ),
-    ];
-  }
 }
 
-class _RecommendedContent {
-  const _RecommendedContent({
-    required this.color,
-    required this.icon,
+class _ActivityCard extends StatelessWidget {
+  const _ActivityCard({
     required this.title,
     required this.subtitle,
-    required this.duration,
+    required this.buttonColor,
   });
 
-  final Color color;
-  final IconData icon;
   final String title;
   final String subtitle;
-  final String duration;
-}
+  final Color buttonColor;
 
-class _SpotlightContent {
-  const _SpotlightContent({
-    required this.color,
-    required this.textColor,
-    required this.title,
-    required this.subtitle,
-  });
-
-  final Color color;
-  final Color textColor;
-  final String title;
-  final String subtitle;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 76,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x1A000000),
+            blurRadius: 3,
+            offset: Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF64748B),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: buttonColor,
+              shape: BoxShape.circle,
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x1A000000),
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Icon(Icons.play_arrow_rounded, color: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
 }

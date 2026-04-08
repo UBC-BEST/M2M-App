@@ -20,20 +20,19 @@ class SettingsTile extends StatelessWidget {
       leading: Icon(icon, size: 30.0, color: Colors.black),
       title: Text(
         title,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
       ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (subtitle != null)
-            Text(
+      subtitle: subtitle == null
+          ? null
+          : Text(
               subtitle!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(color: Colors.grey, fontSize: 14),
             ),
-          const SizedBox(width: 8),
-          const Icon(Icons.chevron_right, color: Colors.grey, size: 30.0),
-        ],
-      ),
+      trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 30.0),
       onTap: onTap,
       visualDensity: const VisualDensity(vertical: -1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
