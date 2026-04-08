@@ -511,22 +511,8 @@ class BluetoothSensorService extends ChangeNotifier {
       final clamped = raw.clamp(0, 4095);
 
       _latestRawValue = clamped;
-      // Firmware may emit a non-zero button even when ladder raw is 0
-      // (joystick diagnostics). Gate by raw>0 to keep app buttons stable.
-      final firmwareButton = (btn >= 1 && btn <= 12 && clamped > 0) ? btn : null;
-      final profileButton = _buttonProfile?.decodeButton(clamped);
-      final rangeButton = ButtonCalibrationProfile.decodeM2MRangeButton(clamped);
-      // Prefer explicit firmware button when provided, then calibration/profile mapping.
-      _activeButton =
-          firmwareButton ?? profileButton ?? rangeButton;
-
-      // If per-pin telemetry is missing from BLE text payload, mirror the decoded
-      // button/raw frame into finger pin diagnostics so Index/Middle/Thumb still
-      // show live values in the monitor.
-      _applyFingerFallbackTelemetry(
-        button: _activeButton,
-        raw: clamped,
-      );
+      // Trust firmware button mapping as source of truth.
+      _activeButton = (btn >= 1 && btn <= 12) ? btn : null;
 
       if (!_hasSmoothedValue) {
         _smoothedValue = clamped;
@@ -554,25 +540,26 @@ class BluetoothSensorService extends ChangeNotifier {
   }
 
   void _parsePinReadings(List<int> value) {
-    final text = utf8.decode(value, allowMalformed: true);
-    if (text.trim().isEmpty) return;
-
-    // Supports payload fragments like:
-    // "13:120,12:0,14:55,27:0,26:9,25:2140,33:1870"
-    final matches = RegExp(r'(\d+)\s*[:=]\s*(-?\d+)').allMatches(text);
-    if (matches.isEmpty) return;
-
     var changed = false;
-    for (final match in matches) {
-      final pinStr = match.group(1);
-      final valueStr = match.group(2);
-      if (pinStr == null || valueStr == null) continue;
-      final pin = int.tryParse(pinStr);
-      final reading = int.tryParse(valueStr);
-      if (pin == null || reading == null) continue;
-      if (_pinReadings[pin] == reading) continue;
-      _pinReadings[pin] = reading;
-      changed = true;
+    for (final text in _extractPacketTextVariants(value)) {
+      if (text.trim().isEmpty) continue;
+
+      // Supports payload fragments like:
+      // "13:120,12:0,14:55,27:0,26:9,25:2140,33:1870"
+      final matches = RegExp(r'(\d+)\s*[:=]\s*(-?\d+)').allMatches(text);
+      if (matches.isEmpty) continue;
+
+      for (final match in matches) {
+        final pinStr = match.group(1);
+        final valueStr = match.group(2);
+        if (pinStr == null || valueStr == null) continue;
+        final pin = int.tryParse(pinStr);
+        final reading = int.tryParse(valueStr);
+        if (pin == null || reading == null) continue;
+        if (_pinReadings[pin] == reading) continue;
+        _pinReadings[pin] = reading;
+        changed = true;
+      }
     }
 
     if (changed) {
@@ -581,10 +568,18 @@ class BluetoothSensorService extends ChangeNotifier {
   }
 
   (int button, int raw)? _decodeButtonAndRaw(List<int> value) {
-    // Text packets from firmware are common while debugging. If packet looks like
-    // ASCII, try extracting explicit fields first.
+    // Primary path for current firmware packet:
+    // [button (0..12), raw_low, raw_high, optional ASCII telemetry...]
+    if (_hasBinaryHeader(value)) {
+      final btn = value[0];
+      final raw = value[1] | (value[2] << 8);
+      return (btn, raw);
+    }
+
+    // Text packets from firmware are common while debugging. Try extracting
+    // explicit fields first.
     if (_looksLikeAsciiPayload(value)) {
-      final text = utf8.decode(value, allowMalformed: true);
+      final text = _extractPacketText(value);
       final textButton = _extractFirstIntField(
         text,
         const <String>['button', 'btn', 'activeButton', 'active'],
@@ -631,13 +626,6 @@ class BluetoothSensorService extends ChangeNotifier {
       }
     }
 
-    // Binary packet fallback: [button (1-12, 0=none), raw_low, raw_high]
-    if (value.length >= 3) {
-      final btn = value[0];
-      final raw = value[1] | (value[2] << 8);
-      return (btn, raw);
-    }
-
     return null;
   }
 
@@ -650,7 +638,63 @@ class BluetoothSensorService extends ChangeNotifier {
         printable++;
       }
     }
-    return printable / bytes.length >= 0.85;
+    return printable / bytes.length >= 0.6;
+  }
+
+  String _extractPacketText(List<int> value) {
+    if (value.isEmpty) {
+      return '';
+    }
+    final variants = _extractPacketTextVariants(value);
+    return variants.isEmpty ? '' : variants.first;
+  }
+
+  List<String> _extractPacketTextVariants(List<int> value) {
+    if (value.isEmpty) {
+      return const <String>[];
+    }
+
+    // Handle both packet styles:
+    // 1) [btn,rawL,rawH,ascii...]
+    // 2) ascii-only payload
+    if (_hasBinaryHeader(value) && value.length > 3) {
+      return <String>[
+        utf8.decode(value.sublist(3), allowMalformed: true),
+        utf8.decode(value, allowMalformed: true),
+      ];
+    }
+
+    return <String>[utf8.decode(value, allowMalformed: true)];
+  }
+
+  bool _hasBinaryHeader(List<int> value) {
+    if (value.length < 3) {
+      return false;
+    }
+
+    final first = value[0];
+    final second = value[1];
+    final third = value[2];
+
+    // Firmware button id is 0..12 in byte 0. If byte 0 looks like ASCII digit
+    // and header is not plausible, treat packet as text-only.
+    if (first > 12) {
+      return false;
+    }
+
+    // raw is 12-bit in bytes 1/2, so high byte should be <= 0x0F.
+    if (third > 0x0F) {
+      return false;
+    }
+
+    // If bytes 1/2 are both printable delimiters/digits, likely text-only.
+    final secondPrintable = second >= 32 && second <= 126;
+    final thirdPrintable = third >= 32 && third <= 126;
+    if (secondPrintable && thirdPrintable) {
+      return false;
+    }
+
+    return true;
   }
 
   int? _extractFirstIntField(String text, List<String> keys) {
@@ -675,45 +719,6 @@ class BluetoothSensorService extends ChangeNotifier {
     return int.tryParse(value);
   }
 
-  void _applyFingerFallbackTelemetry({
-    required int? button,
-    required int raw,
-  }) {
-    final hadAnyFingerTelemetry =
-        _pinReadings[_pinIndex] != null ||
-        _pinReadings[_pinMiddle] != null ||
-        _pinReadings[_pinThumb] != null ||
-        _pinReadings[_legacyPinIndex] != null ||
-        _pinReadings[_legacyPinMiddle] != null ||
-        _pinReadings[_legacyPinThumb] != null;
-    if (hadAnyFingerTelemetry) {
-      return;
-    }
-
-    // Keep both "new" and legacy monitor mappings in sync.
-    _pinReadings[_pinIndex] = 0;
-    _pinReadings[_pinMiddle] = 0;
-    _pinReadings[_pinThumb] = 0;
-    _pinReadings[_legacyPinIndex] = 0;
-    _pinReadings[_legacyPinMiddle] = 0;
-    _pinReadings[_legacyPinThumb] = 0;
-
-    if (button == null || raw <= 0) {
-      return;
-    }
-
-    if (button == 2) {
-      _pinReadings[_pinIndex] = raw;
-      _pinReadings[_legacyPinIndex] = raw;
-    } else if (button == 3) {
-      _pinReadings[_pinMiddle] = raw;
-      _pinReadings[_legacyPinMiddle] = raw;
-    } else if (button == 5) {
-      _pinReadings[_pinThumb] = raw;
-      _pinReadings[_legacyPinThumb] = raw;
-    }
-  }
-
   int? _maxNonNull(
     int? a,
     int? b,
@@ -726,7 +731,7 @@ class BluetoothSensorService extends ChangeNotifier {
   ]) {
     int? best;
     for (final v in <int?>[a, b, c, d, e, f, g, h]) {
-      if (v == null || v < 0) continue;
+      if (v == null || v <= 0) continue;
       if (best == null || v > best) {
         best = v;
       }

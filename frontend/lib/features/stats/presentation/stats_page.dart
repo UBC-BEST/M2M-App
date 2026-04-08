@@ -176,9 +176,9 @@ class _JoystickHardwareMonitor extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     const fsrPins = <(int pin, String label)>[
-      (36, 'Index'),
-      (39, 'Middle'),
-      (35, 'Thumb'),
+      (27, 'Index'),
+      (14, 'Middle'),
+      (26, 'Thumb/Flex'),
     ];
     const axisPins = <(int pin, String label)>[
       (25, 'Y Axis (forward)'),
@@ -186,7 +186,7 @@ class _JoystickHardwareMonitor extends StatelessWidget {
     ];
 
     Widget pinTile(int pin, String label, {bool showBar = false}) {
-      final value = _readingForDisplayedPin(pin);
+      final value = pinReadings[pin];
       final normalized = value == null ? 0.0 : (value / 4095).clamp(0.0, 1.0);
       return Container(
         margin: const EdgeInsets.only(bottom: 8),
@@ -258,22 +258,6 @@ class _JoystickHardwareMonitor extends StatelessWidget {
     );
   }
 
-  int? _readingForDisplayedPin(int pin) {
-    // Support both new and legacy firmware pin layouts.
-    if (pinReadings[pin] != null) {
-      return pinReadings[pin];
-    }
-    switch (pin) {
-      case 36:
-        return pinReadings[27];
-      case 39:
-        return pinReadings[14];
-      case 35:
-        return pinReadings[26];
-      default:
-        return null;
-    }
-  }
 }
 
 class _ButtonInputGrid extends StatelessWidget {
