@@ -65,6 +65,10 @@ class _GameSensorCalibrationPageState extends State<GameSensorCalibrationPage> {
   @override
   Widget build(BuildContext context) {
     final buttonProfile = _sensorService.buttonProfile;
+    final isConnected = _sensorService.isConnected;
+    final currentPercent =
+        _sensorService.currentPercent.clamp(0, 100).toDouble();
+    final normalized = (currentPercent / 100).clamp(0.0, 1.0);
     if (_loading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -80,6 +84,15 @@ class _GameSensorCalibrationPageState extends State<GameSensorCalibrationPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: <Widget>[
+          _BleStatusCard(
+            isConnected: isConnected,
+            status: _sensorService.status,
+            currentRaw: _sensorService.currentRawValue,
+            currentPercent: currentPercent,
+            activeButton: _sensorService.activeButton,
+            onConnect: () => _sensorService.connectToSavedDevice(),
+          ),
+          const SizedBox(height: 16),
           SegmentedButton<UnityGame>(
             segments: UnityGame.values
                 .map(
@@ -97,6 +110,22 @@ class _GameSensorCalibrationPageState extends State<GameSensorCalibrationPage> {
             },
           ),
           const SizedBox(height: 20),
+          _QuickCaptureRow(
+            normalized: normalized,
+            onCaptureMin: () => _captureAndApplyPreset(
+              preset.copyWith(min: normalized),
+            ),
+            onCaptureCenter: () => _captureAndApplyPreset(
+              preset.copyWith(center: normalized),
+            ),
+            onCaptureMax: () => _captureAndApplyPreset(
+              preset.copyWith(max: normalized),
+            ),
+            onCaptureThreshold: () => _captureAndApplyPreset(
+              preset.copyWith(triggerThreshold: normalized),
+            ),
+          ),
+          const SizedBox(height: 8),
           _SliderTile(
             label: 'Center',
             value: preset.center,
@@ -177,12 +206,10 @@ class _GameSensorCalibrationPageState extends State<GameSensorCalibrationPage> {
             activeButton: _sensorService.activeButton,
             currentRaw: _sensorService.currentRawValue,
             isCalibrating: _isCalibratingButtons,
-            onStartCalibration: _isCalibratingButtons
-                ? null
-                : _runGuidedButtonCalibration,
-            onClearCalibration: _isCalibratingButtons
-                ? null
-                : _clearButtonCalibration,
+            onStartCalibration:
+                _isCalibratingButtons ? null : _runGuidedButtonCalibration,
+            onClearCalibration:
+                _isCalibratingButtons ? null : _clearButtonCalibration,
           ),
         ],
       ),
@@ -193,6 +220,16 @@ class _GameSensorCalibrationPageState extends State<GameSensorCalibrationPage> {
     setState(() {
       _presets[_selectedGame] = preset;
     });
+  }
+
+  void _captureAndApplyPreset(GameCalibrationPreset nextPreset) {
+    if (!_sensorService.isConnected) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Connect your ESP sensor first.')),
+      );
+      return;
+    }
+    _updatePreset(nextPreset);
   }
 
   Future<void> _runGuidedButtonCalibration() async {
@@ -335,9 +372,8 @@ class _GameSensorCalibrationPageState extends State<GameSensorCalibrationPage> {
       return 'Calibration incomplete. Please capture all 12 buttons.';
     }
 
-    final distancesToIdle = samples.values
-        .map((value) => (value - idleRaw).abs())
-        .toList();
+    final distancesToIdle =
+        samples.values.map((value) => (value - idleRaw).abs()).toList();
     final minIdleDistance = distancesToIdle.reduce(
       (a, b) => a < b ? a : b,
     );
@@ -445,6 +481,131 @@ class _ButtonCalibrationCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _BleStatusCard extends StatelessWidget {
+  const _BleStatusCard({
+    required this.isConnected,
+    required this.status,
+    required this.currentRaw,
+    required this.currentPercent,
+    required this.activeButton,
+    required this.onConnect,
+  });
+
+  final bool isConnected;
+  final String status;
+  final int currentRaw;
+  final double currentPercent;
+  final int? activeButton;
+  final Future<void> Function() onConnect;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color:
+              isConnected ? const Color(0xFF22C55E) : const Color(0xFFE5E7EB),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                isConnected
+                    ? Icons.bluetooth_connected
+                    : Icons.bluetooth_disabled,
+                color: isConnected ? const Color(0xFF16A34A) : Colors.black45,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                isConnected
+                    ? 'ESP sensor connected'
+                    : 'ESP sensor disconnected',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: isConnected ? const Color(0xFF166534) : Colors.black87,
+                ),
+              ),
+              const Spacer(),
+              if (!isConnected)
+                FilledButton.tonal(
+                  onPressed: onConnect,
+                  child: const Text('Connect'),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text('Status: $status'),
+          const SizedBox(height: 2),
+          Text(
+              'Live raw: $currentRaw  •  ${currentPercent.toStringAsFixed(1)}%'),
+          if (activeButton != null) ...[
+            const SizedBox(height: 2),
+            Text('Detected button: $activeButton'),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickCaptureRow extends StatelessWidget {
+  const _QuickCaptureRow({
+    required this.normalized,
+    required this.onCaptureMin,
+    required this.onCaptureCenter,
+    required this.onCaptureMax,
+    required this.onCaptureThreshold,
+  });
+
+  final double normalized;
+  final VoidCallback onCaptureMin;
+  final VoidCallback onCaptureCenter;
+  final VoidCallback onCaptureMax;
+  final VoidCallback onCaptureThreshold;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Live normalized: ${normalized.toStringAsFixed(3)}',
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            OutlinedButton(
+              onPressed: onCaptureMin,
+              child: const Text('Capture Min'),
+            ),
+            OutlinedButton(
+              onPressed: onCaptureCenter,
+              child: const Text('Capture Center'),
+            ),
+            OutlinedButton(
+              onPressed: onCaptureMax,
+              child: const Text('Capture Max'),
+            ),
+            OutlinedButton(
+              onPressed: onCaptureThreshold,
+              child: const Text('Capture Threshold'),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
