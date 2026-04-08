@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/services/bluetooth_sensor_service.dart';
+import '../../../unity/domain/button_calibration_profile.dart';
 import '../../../unity/application/sensor_game_bridge.dart';
 import '../../../unity/domain/game_calibration_preset.dart';
 import '../../../unity/domain/unity_game.dart';
@@ -14,20 +16,30 @@ class GameSensorCalibrationPage extends StatefulWidget {
 
 class _GameSensorCalibrationPageState extends State<GameSensorCalibrationPage> {
   final SensorGameBridge _bridge = SensorGameBridge.instance;
+  final BluetoothSensorService _sensorService = BluetoothSensorService.instance;
   final Map<UnityGame, GameCalibrationPreset> _presets =
       <UnityGame, GameCalibrationPreset>{};
 
   bool _loading = true;
+  bool _isCalibratingButtons = false;
   UnityGame _selectedGame = UnityGame.pizza;
 
   @override
   void initState() {
     super.initState();
+    _sensorService.addListener(_onSensorUpdate);
     _load();
+  }
+
+  @override
+  void dispose() {
+    _sensorService.removeListener(_onSensorUpdate);
+    super.dispose();
   }
 
   Future<void> _load() async {
     await _bridge.ensureInitialized();
+    await _sensorService.ensureInitialized(autoConnect: true);
     for (final game in UnityGame.values) {
       _presets[game] = await _bridge.readPreset(game);
     }
@@ -45,8 +57,14 @@ class _GameSensorCalibrationPageState extends State<GameSensorCalibrationPage> {
       );
   }
 
+  void _onSensorUpdate() {
+    if (!mounted || _loading) return;
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
+    final buttonProfile = _sensorService.buttonProfile;
     if (_loading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -152,6 +170,20 @@ class _GameSensorCalibrationPageState extends State<GameSensorCalibrationPage> {
             icon: const Icon(Icons.save_outlined),
             label: const Text('Save Preset'),
           ),
+          const SizedBox(height: 28),
+          _ButtonCalibrationCard(
+            profile: buttonProfile,
+            isConnected: _sensorService.isConnected,
+            activeButton: _sensorService.activeButton,
+            currentRaw: _sensorService.currentRawValue,
+            isCalibrating: _isCalibratingButtons,
+            onStartCalibration: _isCalibratingButtons
+                ? null
+                : _runGuidedButtonCalibration,
+            onClearCalibration: _isCalibratingButtons
+                ? null
+                : _clearButtonCalibration,
+          ),
         ],
       ),
     );
@@ -161,6 +193,259 @@ class _GameSensorCalibrationPageState extends State<GameSensorCalibrationPage> {
     setState(() {
       _presets[_selectedGame] = preset;
     });
+  }
+
+  Future<void> _runGuidedButtonCalibration() async {
+    if (!_sensorService.isConnected) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Connect your BLE sensor first in Bluetooth Devices.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isCalibratingButtons = true);
+    final samples = <int, int>{};
+
+    try {
+      final idleAccepted = await _showStepDialog(
+        title: 'Idle sample',
+        body:
+            'Release all buttons and keep your hand still. Tap Capture to record the idle reading.',
+        actionLabel: 'Capture',
+      );
+      if (!idleAccepted) return;
+      final idleRaw = await _captureAverageRaw();
+
+      for (var button = 1; button <= 12; button++) {
+        if (!mounted) return;
+        final accepted = await _showStepDialog(
+          title: 'Button $button',
+          body: 'Press and hold button $button, then tap Capture.',
+          actionLabel: 'Capture',
+        );
+        if (!accepted) return;
+        samples[button] = await _captureAverageRaw();
+      }
+
+      final validationError = _validateSamples(idleRaw, samples);
+      if (validationError != null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(validationError)),
+        );
+        return;
+      }
+
+      final tolerance = _estimateMatchTolerance(idleRaw, samples);
+      final releaseTolerance = _estimateReleaseTolerance(idleRaw, samples);
+      final profile = ButtonCalibrationProfile(
+        idleRaw: idleRaw,
+        releaseTolerance: releaseTolerance,
+        matchTolerance: tolerance,
+        buttonRawValues: samples,
+      );
+
+      await _sensorService.saveButtonCalibrationProfile(profile);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Button calibration saved')),
+      );
+      setState(() {});
+    } finally {
+      if (mounted) {
+        setState(() => _isCalibratingButtons = false);
+      }
+    }
+  }
+
+  Future<void> _clearButtonCalibration() async {
+    await _sensorService.clearButtonCalibrationProfile();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Button calibration cleared')),
+    );
+    setState(() {});
+  }
+
+  Future<bool> _showStepDialog({
+    required String title,
+    required String body,
+    required String actionLabel,
+  }) async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(body),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(actionLabel),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+
+  Future<int> _captureAverageRaw() async {
+    const samples = 12;
+    var sum = 0;
+    for (var i = 0; i < samples; i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 45));
+      sum += _sensorService.currentRawValue;
+    }
+    return (sum / samples).round();
+  }
+
+  int _estimateMatchTolerance(int idleRaw, Map<int, int> samples) {
+    if (samples.length < 2) return 140;
+    final sorted = samples.values.toList()..sort();
+    var minGap = 1 << 30;
+    for (var i = 1; i < sorted.length; i++) {
+      final gap = (sorted[i] - sorted[i - 1]).abs();
+      if (gap < minGap) minGap = gap;
+    }
+    final byGap = (minGap * 0.35).round();
+    final maxIdleDistance = samples.values
+        .map((v) => (v - idleRaw).abs())
+        .fold<int>(0, (prev, next) => next > prev ? next : prev);
+    final byIdle = (maxIdleDistance * 0.2).round();
+    return _clampInt(byGap < byIdle ? byGap : byIdle, 35, 220);
+  }
+
+  int _estimateReleaseTolerance(int idleRaw, Map<int, int> samples) {
+    if (samples.isEmpty) return 80;
+    final closestButtonDistance = samples.values
+        .map((v) => (v - idleRaw).abs())
+        .fold<int>(1 << 30, (prev, next) => next < prev ? next : prev);
+    final estimate = (closestButtonDistance * 0.35).round();
+    return _clampInt(estimate, 20, 180);
+  }
+
+  String? _validateSamples(int idleRaw, Map<int, int> samples) {
+    if (samples.length < 12) {
+      return 'Calibration incomplete. Please capture all 12 buttons.';
+    }
+
+    final distancesToIdle = samples.values
+        .map((value) => (value - idleRaw).abs())
+        .toList();
+    final minIdleDistance = distancesToIdle.reduce(
+      (a, b) => a < b ? a : b,
+    );
+    if (minIdleDistance < 25) {
+      return 'Some button readings are too close to idle. Press each button firmly and recalibrate.';
+    }
+
+    final sorted = samples.entries.toList()
+      ..sort((a, b) => a.value.compareTo(b.value));
+    var minGap = 1 << 30;
+    for (var i = 1; i < sorted.length; i++) {
+      final gap = (sorted[i].value - sorted[i - 1].value).abs();
+      if (gap < minGap) minGap = gap;
+    }
+    if (minGap < 20) {
+      return 'Multiple buttons measured almost the same value. Recalibrate and hold each button steady while capturing.';
+    }
+
+    return null;
+  }
+
+  int _clampInt(int value, int min, int max) {
+    if (value < min) return min;
+    if (value > max) return max;
+    return value;
+  }
+}
+
+class _ButtonCalibrationCard extends StatelessWidget {
+  const _ButtonCalibrationCard({
+    required this.profile,
+    required this.isConnected,
+    required this.activeButton,
+    required this.currentRaw,
+    required this.isCalibrating,
+    required this.onStartCalibration,
+    required this.onClearCalibration,
+  });
+
+  final ButtonCalibrationProfile? profile;
+  final bool isConnected;
+  final int? activeButton;
+  final int currentRaw;
+  final bool isCalibrating;
+  final VoidCallback? onStartCalibration;
+  final VoidCallback? onClearCalibration;
+
+  @override
+  Widget build(BuildContext context) {
+    final profileReady = profile?.isComplete ?? false;
+    final statusColor = profileReady ? const Color(0xFF1B5E20) : Colors.black54;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Button Mapping (1-12)',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            profileReady
+                ? 'Calibrated: ready for button-to-game mapping'
+                : 'Not calibrated yet',
+            style: TextStyle(color: statusColor, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          Text('Connection: ${isConnected ? 'Connected' : 'Disconnected'}'),
+          Text('Live raw: $currentRaw'),
+          Text('Detected button: ${activeButton?.toString() ?? '-'}'),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              FilledButton.icon(
+                onPressed: onStartCalibration,
+                icon: const Icon(Icons.auto_fix_high),
+                label: Text(
+                  isCalibrating
+                      ? 'Calibrating...'
+                      : profileReady
+                          ? 'Recalibrate'
+                          : 'Run Guided Calibration',
+                ),
+              ),
+              OutlinedButton(
+                onPressed: onClearCalibration,
+                child: const Text('Clear'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 

@@ -33,6 +33,7 @@ class SensorGameBridge extends ChangeNotifier {
   int _pizzaLaneIndex = 0;
   String _status = 'Idle';
   String _lastUnityEvent = '';
+  int? _lastActiveButton;
 
   UnityGame? get activeGame => _activeGame;
   bool get unityReady => _unityReady;
@@ -92,6 +93,7 @@ class SensorGameBridge extends ChangeNotifier {
     _sendTimer?.cancel();
     _sendTimer = null;
     _activeGame = null;
+    _lastActiveButton = null;
     _setStatus('Session ended');
     notifyListeners();
   }
@@ -233,31 +235,56 @@ class SensorGameBridge extends ChangeNotifier {
     required double axis,
     required GameCalibrationPreset preset,
   }) {
+    final activeButton = _sensorService.activeButton;
+    final pressedEdge =
+        activeButton != null && activeButton != _lastActiveButton;
+    _lastActiveButton = activeButton;
+
     final actions = <String, dynamic>{
       'connected': isSensorConnected,
       'unityReady': _unityReady,
       'sensorPercent': currentSensorPercent,
+      'activeButton': activeButton,
     };
 
     switch (game) {
       case UnityGame.pizza:
-        final canTrigger = normalized >= preset.triggerThreshold &&
+        final mappedButton = activeButton != null &&
+                <int>{2, 3, 5}.contains(activeButton)
+            ? activeButton
+            : null;
+        final canTrigger =
+            pressedEdge &&
+            mappedButton != null &&
             _canTrigger('pizza', nowMs, preset.triggerCooldownMs);
-        String lane = '';
-        if (canTrigger) {
-          lane = _nextPizzaLane();
-        }
+        final isIndex = mappedButton == 2;
+        final isMiddle = mappedButton == 3;
+        final isThumb = mappedButton == 5;
+        final lane = mappedButton != null ? _laneForPizzaButton(mappedButton) : '';
         actions['tap'] = canTrigger;
         actions['lane'] = lane;
-        actions['index'] = canTrigger && lane == 'index';
-        actions['middle'] = canTrigger && lane == 'middle';
-        actions['ring'] = canTrigger && lane == 'ring';
-        actions['pinky'] = canTrigger && lane == 'pinky';
+        // Keep level-style booleans true while held for polling-based Unity scripts.
+        actions['index'] = isIndex;
+        actions['middle'] = isMiddle;
+        actions['thumb'] = isThumb;
+        actions['olives'] = isIndex;
+        actions['pepperoni'] = isMiddle;
+        actions['sausage'] = false;
+        actions['greenPepper'] = isThumb;
+        // Also emit explicit edge-trigger variants for event-based handlers.
+        actions['indexTap'] = canTrigger && isIndex;
+        actions['middleTap'] = canTrigger && isMiddle;
+        actions['thumbTap'] = canTrigger && isThumb;
+        actions['olivesTap'] = canTrigger && isIndex;
+        actions['pepperoniTap'] = canTrigger && isMiddle;
+        actions['sausageTap'] = false;
+        actions['greenPepperTap'] = canTrigger && isThumb;
         break;
       case UnityGame.fishing:
-        actions['verticalAxis'] = axis;
-        actions['reelUp'] = axis > 0.2;
-        actions['reelDown'] = axis < -0.2;
+        final reelDown = activeButton == 5;
+        actions['verticalAxis'] = reelDown ? -1.0 : 1.0;
+        actions['reelUp'] = !reelDown;
+        actions['reelDown'] = reelDown;
         break;
       case UnityGame.jumping:
         actions['horizontalAxis'] = axis;
@@ -277,10 +304,23 @@ class SensorGameBridge extends ChangeNotifier {
   }
 
   String _nextPizzaLane() {
-    const lanes = <String>['index', 'middle', 'ring', 'pinky'];
+    const lanes = <String>['index', 'middle', 'thumb'];
     final lane = lanes[_pizzaLaneIndex % lanes.length];
     _pizzaLaneIndex++;
     return lane;
+  }
+
+  String _laneForPizzaButton(int button) {
+    switch (button) {
+      case 2:
+        return 'index';
+      case 3:
+        return 'middle';
+      case 5:
+        return 'thumb';
+      default:
+        return _nextPizzaLane();
+    }
   }
 
   double _normalize({

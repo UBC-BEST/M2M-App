@@ -24,7 +24,7 @@ class _UnityGameLaunchPageState extends State<UnityGameLaunchPage> {
   @override
   void initState() {
     super.initState();
-    _enterImmersiveLandscape();
+    _applyGameOrientation();
     _bridge.addListener(_onBridgeUpdate);
     _bootstrap();
   }
@@ -34,12 +34,12 @@ class _UnityGameLaunchPageState extends State<UnityGameLaunchPage> {
     await _bridge.startSession(widget.game);
   }
 
-  Future<void> _enterImmersiveLandscape() async {
+  Future<void> _applyGameOrientation() async {
     await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
     ]);
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
 
   Future<void> _restorePortraitSystemUi() async {
@@ -129,111 +129,39 @@ class _UnityGameLaunchPageState extends State<UnityGameLaunchPage> {
       );
     }
 
-    final isConnected = _bridge.isSensorConnected;
-    final status = _bridge.status;
-    final sensorValue = _bridge.currentSensorPercent.toStringAsFixed(1);
-
     return Scaffold(
       body: Stack(
         children: <Widget>[
           Positioned.fill(
-            child: UnityWidget(
-              onUnityCreated: _onUnityCreated,
-              onUnityUnloaded: _onUnityUnloaded,
-              onUnityMessage: _onUnityMessage,
+            child: ColoredBox(
+              color: Colors.black,
+              child: UnityWidget(
+                onUnityCreated: _onUnityCreated,
+                onUnityUnloaded: _onUnityUnloaded,
+                onUnityMessage: _onUnityMessage,
+              ),
             ),
           ),
           SafeArea(
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: Container(
-                margin: const EdgeInsets.all(12),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.75),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Text(
-                            widget.game.displayName,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            status,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    _StatusPill(
-                      label: isConnected
-                          ? 'Sensor $sensorValue%'
-                          : 'Sensor offline',
-                      ok: isConnected,
-                    ),
-                    const SizedBox(width: 8),
-                    _StatusPill(
-                      label:
-                          _bridge.unityReady ? 'Unity ready' : 'Unity loading',
-                      ok: _bridge.unityReady,
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      onPressed: _closeGame,
-                      icon: const Icon(Icons.close, color: Colors.white),
-                    ),
-                  ],
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.55),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    tooltip: 'Back to games',
+                    onPressed: _closeGame,
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  ),
                 ),
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _StatusPill extends StatelessWidget {
-  const _StatusPill({
-    required this.label,
-    required this.ok,
-  });
-
-  final String label;
-  final bool ok;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: ok ? const Color(0xFF16A34A) : const Color(0xFFDC2626),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-        ),
       ),
     );
   }

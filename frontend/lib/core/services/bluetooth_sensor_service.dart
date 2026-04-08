@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:m2m/core/config/app_config.dart';
+import 'package:m2m/features/unity/data/button_calibration_store.dart';
+import 'package:m2m/features/unity/domain/button_calibration_profile.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'bluetooth_device_manager.dart';
@@ -15,8 +18,17 @@ class BluetoothSensorService extends ChangeNotifier {
 
   static const double _smoothingAlpha = 0.85;
   static const Duration _scanDuration = Duration(seconds: 8);
+  static const int _pinIndex = 36;
+  static const int _pinMiddle = 39;
+  static const int _pinThumb = 35;
+  static const int _legacyPinIndex = 27;
+  static const int _legacyPinMiddle = 14;
+  static const int _legacyPinThumb = 26;
+  static const int _legacyPinRing = 12;
+  static const int _legacyPinPinky = 13;
 
   final BluetoothDeviceManager _deviceManager = BluetoothDeviceManager();
+  final ButtonCalibrationStore _buttonStore = ButtonCalibrationStore();
   final Guid _serviceUuid = Guid(AppConfig.bleServiceUuid);
   final Guid _characteristicUuid = Guid(AppConfig.bleCharacteristicUuid);
   final Map<String, ScanResult> _scanResults = <String, ScanResult>{};
@@ -30,6 +42,7 @@ class BluetoothSensorService extends ChangeNotifier {
   BluetoothDevice? _device;
   BluetoothCharacteristic? _characteristic;
   SavedBluetoothDevice? _selectedDevice;
+  ButtonCalibrationProfile? _buttonProfile;
   String? _connectingDeviceId;
   DateTime? _lastNotifyAt;
 
@@ -43,6 +56,9 @@ class BluetoothSensorService extends ChangeNotifier {
   String _status = 'Idle';
   int _smoothedValue = 0;
   int _maxValue = 0;
+  int _latestRawValue = 0;
+  int? _activeButton;
+  final Map<int, int> _pinReadings = <int, int>{};
 
   List<ScanResult> get scanResults {
     final values = _scanResults.values.toList();
@@ -69,13 +85,22 @@ class BluetoothSensorService extends ChangeNotifier {
   bool get isConnected => _isConnected;
   bool get statusIsError => _statusIsError;
   String get status => _status;
+  int get currentRawValue => _latestRawValue;
   double get currentPercent => (_smoothedValue / 4095) * 100;
   double get maxPercent => (_maxValue / 4095) * 100;
+  int? get activeButton => _activeButton;
+  Map<int, int> get pinReadings => Map<int, int>.unmodifiable(_pinReadings);
+  ButtonCalibrationProfile? get buttonProfile => _buttonProfile;
+  bool get hasButtonCalibration => _buttonProfile != null;
 
   Future<void> ensureInitialized({bool autoConnect = false}) async {
     if (!_initialized) {
       _initialized = true;
       _selectedDevice = await _deviceManager.readSelectedDevice();
+      final savedProfile = await _buttonStore.readProfile();
+      _buttonProfile = (savedProfile != null && savedProfile.hasDistinctButtons)
+          ? savedProfile
+          : ButtonCalibrationProfile.m2mDefault;
       _adapterSub = FlutterBluePlus.adapterState.listen(_handleAdapterState);
       notifyListeners();
     }
@@ -262,6 +287,22 @@ class BluetoothSensorService extends ChangeNotifier {
 
   void resetMax() {
     _maxValue = 0;
+    notifyListeners();
+  }
+
+  Future<void> saveButtonCalibrationProfile(
+    ButtonCalibrationProfile profile,
+  ) async {
+    _buttonProfile = profile;
+    await _buttonStore.writeProfile(profile);
+    _activeButton = profile.decodeButton(_latestRawValue);
+    notifyListeners();
+  }
+
+  Future<void> clearButtonCalibrationProfile() async {
+    _buttonProfile = null;
+    _activeButton = null;
+    await _buttonStore.clearProfile();
     notifyListeners();
   }
 
@@ -461,9 +502,31 @@ class BluetoothSensorService extends ChangeNotifier {
     _lastNotifyAt = null;
 
     _notifySub = characteristic.onValueReceived.listen((value) {
-      if (value.length < 2) return;
-      final raw = value[0] | (value[1] << 8);
+      _parsePinReadings(value);
+      final decoded = _decodeButtonAndRaw(value);
+      if (decoded == null) return;
+
+      final btn = decoded.$1;
+      final raw = decoded.$2;
       final clamped = raw.clamp(0, 4095);
+
+      _latestRawValue = clamped;
+      // Firmware may emit a non-zero button even when ladder raw is 0
+      // (joystick diagnostics). Gate by raw>0 to keep app buttons stable.
+      final firmwareButton = (btn >= 1 && btn <= 12 && clamped > 0) ? btn : null;
+      final profileButton = _buttonProfile?.decodeButton(clamped);
+      final rangeButton = ButtonCalibrationProfile.decodeM2MRangeButton(clamped);
+      // Prefer explicit firmware button when provided, then calibration/profile mapping.
+      _activeButton =
+          firmwareButton ?? profileButton ?? rangeButton;
+
+      // If per-pin telemetry is missing from BLE text payload, mirror the decoded
+      // button/raw frame into finger pin diagnostics so Index/Middle/Thumb still
+      // show live values in the monitor.
+      _applyFingerFallbackTelemetry(
+        button: _activeButton,
+        raw: clamped,
+      );
 
       if (!_hasSmoothedValue) {
         _smoothedValue = clamped;
@@ -489,6 +552,189 @@ class BluetoothSensorService extends ChangeNotifier {
       }
     });
   }
+
+  void _parsePinReadings(List<int> value) {
+    final text = utf8.decode(value, allowMalformed: true);
+    if (text.trim().isEmpty) return;
+
+    // Supports payload fragments like:
+    // "13:120,12:0,14:55,27:0,26:9,25:2140,33:1870"
+    final matches = RegExp(r'(\d+)\s*[:=]\s*(-?\d+)').allMatches(text);
+    if (matches.isEmpty) return;
+
+    var changed = false;
+    for (final match in matches) {
+      final pinStr = match.group(1);
+      final valueStr = match.group(2);
+      if (pinStr == null || valueStr == null) continue;
+      final pin = int.tryParse(pinStr);
+      final reading = int.tryParse(valueStr);
+      if (pin == null || reading == null) continue;
+      if (_pinReadings[pin] == reading) continue;
+      _pinReadings[pin] = reading;
+      changed = true;
+    }
+
+    if (changed) {
+      notifyListeners();
+    }
+  }
+
+  (int button, int raw)? _decodeButtonAndRaw(List<int> value) {
+    // Text packets from firmware are common while debugging. If packet looks like
+    // ASCII, try extracting explicit fields first.
+    if (_looksLikeAsciiPayload(value)) {
+      final text = utf8.decode(value, allowMalformed: true);
+      final textButton = _extractFirstIntField(
+        text,
+        const <String>['button', 'btn', 'activeButton', 'active'],
+      );
+      final textRaw = _extractFirstIntField(
+        text,
+        const <String>['raw', 'adc', 'value', 'sensor'],
+      );
+      final indexPin = _extractPinReadingFromPayload(text, _pinIndex);
+      final middlePin = _extractPinReadingFromPayload(text, _pinMiddle);
+      final thumbPin = _extractPinReadingFromPayload(text, _pinThumb);
+      final legacyIndexPin = _extractPinReadingFromPayload(text, _legacyPinIndex);
+      final legacyMiddlePin =
+          _extractPinReadingFromPayload(text, _legacyPinMiddle);
+      final legacyThumbPin = _extractPinReadingFromPayload(text, _legacyPinThumb);
+      final legacyRingPin = _extractPinReadingFromPayload(text, _legacyPinRing);
+      final legacyPinkyPin =
+          _extractPinReadingFromPayload(text, _legacyPinPinky);
+
+      // Three-finger build: use explicit raw first, then strongest finger pin.
+      final resolvedRaw = textRaw ??
+          _maxNonNull(
+            indexPin,
+            middlePin,
+            thumbPin,
+            legacyIndexPin,
+            legacyMiddlePin,
+            legacyThumbPin,
+            legacyRingPin,
+            legacyPinkyPin,
+          ) ??
+          _maxNonNull(
+            _pinReadings[_pinIndex],
+            _pinReadings[_pinMiddle],
+            _pinReadings[_pinThumb],
+            _pinReadings[_legacyPinIndex],
+            _pinReadings[_legacyPinMiddle],
+            _pinReadings[_legacyPinThumb],
+            _pinReadings[_legacyPinRing],
+            _pinReadings[_legacyPinPinky],
+          );
+      if (resolvedRaw != null) {
+        return (textButton ?? 0, resolvedRaw);
+      }
+    }
+
+    // Binary packet fallback: [button (1-12, 0=none), raw_low, raw_high]
+    if (value.length >= 3) {
+      final btn = value[0];
+      final raw = value[1] | (value[2] << 8);
+      return (btn, raw);
+    }
+
+    return null;
+  }
+
+  bool _looksLikeAsciiPayload(List<int> bytes) {
+    if (bytes.isEmpty) return false;
+    var printable = 0;
+    for (final b in bytes) {
+      final isPrintable = (b >= 32 && b <= 126) || b == 9 || b == 10 || b == 13;
+      if (isPrintable) {
+        printable++;
+      }
+    }
+    return printable / bytes.length >= 0.85;
+  }
+
+  int? _extractFirstIntField(String text, List<String> keys) {
+    for (final key in keys) {
+      final match = RegExp('$key\\s*[:=]\\s*(-?\\d+)', caseSensitive: false)
+          .firstMatch(text);
+      final value = match?.group(1);
+      if (value == null) continue;
+      final parsed = int.tryParse(value);
+      if (parsed != null) return parsed;
+    }
+    return null;
+  }
+
+  int? _extractPinReadingFromPayload(String text, int pin) {
+    final match = RegExp('(?:^|[\\s,|])$pin\\s*[:=]\\s*(-?\\d+)')
+        .firstMatch(text);
+    final value = match?.group(1);
+    if (value == null) {
+      return null;
+    }
+    return int.tryParse(value);
+  }
+
+  void _applyFingerFallbackTelemetry({
+    required int? button,
+    required int raw,
+  }) {
+    final hadAnyFingerTelemetry =
+        _pinReadings[_pinIndex] != null ||
+        _pinReadings[_pinMiddle] != null ||
+        _pinReadings[_pinThumb] != null ||
+        _pinReadings[_legacyPinIndex] != null ||
+        _pinReadings[_legacyPinMiddle] != null ||
+        _pinReadings[_legacyPinThumb] != null;
+    if (hadAnyFingerTelemetry) {
+      return;
+    }
+
+    // Keep both "new" and legacy monitor mappings in sync.
+    _pinReadings[_pinIndex] = 0;
+    _pinReadings[_pinMiddle] = 0;
+    _pinReadings[_pinThumb] = 0;
+    _pinReadings[_legacyPinIndex] = 0;
+    _pinReadings[_legacyPinMiddle] = 0;
+    _pinReadings[_legacyPinThumb] = 0;
+
+    if (button == null || raw <= 0) {
+      return;
+    }
+
+    if (button == 2) {
+      _pinReadings[_pinIndex] = raw;
+      _pinReadings[_legacyPinIndex] = raw;
+    } else if (button == 3) {
+      _pinReadings[_pinMiddle] = raw;
+      _pinReadings[_legacyPinMiddle] = raw;
+    } else if (button == 5) {
+      _pinReadings[_pinThumb] = raw;
+      _pinReadings[_legacyPinThumb] = raw;
+    }
+  }
+
+  int? _maxNonNull(
+    int? a,
+    int? b,
+    int? c, [
+    int? d,
+    int? e,
+    int? f,
+    int? g,
+    int? h,
+  ]) {
+    int? best;
+    for (final v in <int?>[a, b, c, d, e, f, g, h]) {
+      if (v == null || v < 0) continue;
+      if (best == null || v > best) {
+        best = v;
+      }
+    }
+    return best;
+  }
+
+  // REMOVED: _decodeRawValue — replaced by direct binary parsing in _listenForNotifications
 
   Future<void> _stopScan() async {
     try {

@@ -35,12 +35,17 @@
     "connected": true,
     "unityReady": true,
     "sensorPercent": 57.4,
+    "activeButton": 2,
     "tap": false,
     "lane": "index",
     "index": false,
     "middle": false,
     "ring": false,
     "pinky": false,
+    "olives": false,
+    "pepperoni": false,
+    "sausage": false,
+    "greenPepper": false,
     "verticalAxis": 0.22,
     "reelUp": true,
     "reelDown": false,
@@ -72,3 +77,9 @@
 - Always include `bridgeVersion`.
 - Ignore unknown fields in both directions.
 - Add new fields without removing existing keys in v1.
+
+## Current Button Mapping (App Side)
+- Input uses a calibrated mapping from one BLE raw value to buttons `1..12`.
+- Pizza mapping (edge-triggered on press): `1=olives`, `2=pepperoni`, `3=sausage`, `4=greenPepper`.
+- Fishing mapping: holding button `5` drives down (`reelDown=true`, `verticalAxis=-1`), otherwise up (`reelUp=true`, `verticalAxis=1`).
+- Buttons `6..12` are reserved for future game actions.

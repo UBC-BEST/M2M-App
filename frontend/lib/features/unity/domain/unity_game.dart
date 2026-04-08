@@ -2,19 +2,19 @@ enum UnityGame {
   pizza(
     id: 'pizza',
     displayName: 'Pizza Game',
-    unityScene: 'PizzaGame',
+    unityScene: 'Assets/PizzaGame/Scenes/PizzaGame.unity',
     unityRoute: '/pizza',
   ),
   fishing(
     id: 'fishing',
     displayName: 'Fishing Game',
-    unityScene: 'FishingGame',
+    unityScene: 'Assets/FishingGame/Scenes/FishingGame.unity',
     unityRoute: '/fishing',
   ),
   jumping(
     id: 'jumping',
     displayName: 'Jumping Game',
-    unityScene: 'JumpingGame',
+    unityScene: 'Assets/JumpingGame/Scenes/SampleScene.unity',
     unityRoute: '/jumping',
   );
 
