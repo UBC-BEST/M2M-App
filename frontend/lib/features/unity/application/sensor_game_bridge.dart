@@ -19,6 +19,18 @@ class SensorGameBridge extends ChangeNotifier {
   static const int _bridgeVersion = 1;
   static const Duration _sendInterval = Duration(milliseconds: 66);
 
+  /// BLE telemetry key from ESP firmware (`33:xRaw` in `25:yRaw,33:xRaw` slice).
+  static const int _telemetryPinXAxis = 33;
+  static const int _fsrIndexAdjusted = 27;
+  static const int _fsrMiddleAdjusted = 14;
+  static const int _fsrThumbRaw = 26;
+
+  /// Matches ESP `PRESS_THRESHOLD` on baseline-adjusted index/middle.
+  static const int _fsrAdjustedPressThreshold = 120;
+  /// Raw ADC thumb threshold (firmware sends thumb unadjusted).
+  static const int _fsrThumbRawPressThreshold = 500;
+  static const int _joystickHorizontalDeadZoneAdc = 200;
+
   final BluetoothSensorService _sensorService = BluetoothSensorService.instance;
   final GameCalibrationStore _calibrationStore = GameCalibrationStore();
   final Map<UnityGame, GameCalibrationPreset> _presets =
@@ -34,6 +46,8 @@ class SensorGameBridge extends ChangeNotifier {
   String _status = 'Idle';
   String _lastUnityEvent = '';
   int? _lastActiveButton;
+  /// Learned rest position for joystick X (raw ADC) when playing jumping.
+  int? _jumpJoystickCenterAdc;
 
   UnityGame? get activeGame => _activeGame;
   bool get unityReady => _unityReady;
@@ -80,6 +94,9 @@ class SensorGameBridge extends ChangeNotifier {
   Future<void> startSession(UnityGame game) async {
     await ensureInitialized();
     _activeGame = game;
+    if (game == UnityGame.jumping) {
+      _jumpJoystickCenterAdc = null;
+    }
     _pizzaLaneIndex = 0;
     _cooldownsUntilMs.clear();
     _setStatus('Starting ${game.displayName}');
@@ -281,15 +298,18 @@ class SensorGameBridge extends ChangeNotifier {
         actions['greenPepperTap'] = canTrigger && isThumb;
         break;
       case UnityGame.fishing:
-        final reelDown = activeButton == 5;
+        // Reel: any FSR press → line down; release → up (replaces thumb button / W–S).
+        final reelDown =
+            isSensorConnected ? _anyFsrPressed() : (activeButton == 5);
         actions['verticalAxis'] = reelDown ? -1.0 : 1.0;
         actions['reelUp'] = !reelDown;
         actions['reelDown'] = reelDown;
         break;
       case UnityGame.jumping:
-        actions['horizontalAxis'] = axis;
-        actions['moveLeft'] = axis < -0.2;
-        actions['moveRight'] = axis > 0.2;
+        final horizontal = _horizontalAxisForJumping(fallbackAxis: axis);
+        actions['horizontalAxis'] = horizontal;
+        actions['moveLeft'] = horizontal < -0.2;
+        actions['moveRight'] = horizontal > 0.2;
         break;
     }
 
@@ -342,6 +362,37 @@ class SensorGameBridge extends ChangeNotifier {
     final centered = ((normalized - preset.center) * 2.0) * preset.sensitivity;
     if (centered.abs() < preset.deadZone) return 0.0;
     return centered.clamp(-1.0, 1.0);
+  }
+
+  bool _anyFsrPressed() {
+    final pins = _sensorService.pinReadings;
+    final index = pins[_fsrIndexAdjusted] ?? 0;
+    final middle = pins[_fsrMiddleAdjusted] ?? 0;
+    final thumb = pins[_fsrThumbRaw] ?? 0;
+    return index >= _fsrAdjustedPressThreshold ||
+        middle >= _fsrAdjustedPressThreshold ||
+        thumb >= _fsrThumbRawPressThreshold;
+  }
+
+  /// Joystick X from BLE (`33:xRaw`); falls back to [fallbackAxis] if not connected
+  /// or no samples yet (Unity can still use keyboard when `connected` is false).
+  double _horizontalAxisForJumping({required double fallbackAxis}) {
+    if (!isSensorConnected) return fallbackAxis;
+    final xRaw = _sensorService.pinReadings[_telemetryPinXAxis];
+    if (xRaw == null) return fallbackAxis;
+    _jumpJoystickCenterAdc ??= xRaw.clamp(0, 4095);
+    return _mapJoystickDeltaToAxis(xRaw - _jumpJoystickCenterAdc!);
+  }
+
+  static double _mapJoystickDeltaToAxis(int delta) {
+    if (delta.abs() <= _joystickHorizontalDeadZoneAdc) {
+      return 0.0;
+    }
+    final sign = delta.sign;
+    const usable = 2048 - _joystickHorizontalDeadZoneAdc;
+    final magnitude = ((delta.abs() - _joystickHorizontalDeadZoneAdc) / usable)
+        .clamp(0.0, 1.0);
+    return sign * magnitude;
   }
 
   Map<String, dynamic> _parseUnityMessage(dynamic message) {
