@@ -38,6 +38,7 @@ class BluetoothSensorService extends ChangeNotifier {
   StreamSubscription<List<int>>? _notifySub;
   StreamSubscription<BluetoothAdapterState>? _adapterSub;
   Timer? _notifyWatchdog;
+  Timer? _autoReconnectTimer;
 
   BluetoothDevice? _device;
   BluetoothCharacteristic? _characteristic;
@@ -52,6 +53,7 @@ class BluetoothSensorService extends ChangeNotifier {
   bool _isConnected = false;
   bool _statusIsError = false;
   bool _hasSmoothedValue = false;
+  bool _manualDisconnectInProgress = false;
 
   String _status = 'Idle';
   int _smoothedValue = 0;
@@ -253,6 +255,9 @@ class BluetoothSensorService extends ChangeNotifier {
   }
 
   Future<void> disconnect({bool resetStatus = true}) async {
+    _manualDisconnectInProgress = resetStatus;
+    _autoReconnectTimer?.cancel();
+    _autoReconnectTimer = null;
     _notifyWatchdog?.cancel();
     _notifyWatchdog = null;
 
@@ -283,6 +288,7 @@ class BluetoothSensorService extends ChangeNotifier {
     } else {
       notifyListeners();
     }
+    _manualDisconnectInProgress = false;
   }
 
   void resetMax() {
@@ -463,6 +469,7 @@ class BluetoothSensorService extends ChangeNotifier {
           _isConnecting = false;
           _connectingDeviceId = null;
           _setStatus('Disconnected');
+          _scheduleAutoReconnect();
         }
       });
 
@@ -488,13 +495,32 @@ class BluetoothSensorService extends ChangeNotifier {
       _isConnecting = false;
       _isConnected = true;
       _connectingDeviceId = null;
+      _autoReconnectTimer?.cancel();
+      _autoReconnectTimer = null;
       _setStatus('Connected to $displayName');
     } catch (error) {
       _isConnecting = false;
       _isConnected = false;
       _connectingDeviceId = null;
       _setStatus('Error: $error', isError: true);
+      _scheduleAutoReconnect();
     }
+  }
+
+  void _scheduleAutoReconnect() {
+    if (_manualDisconnectInProgress) {
+      return;
+    }
+    if (_selectedDevice == null || _isConnecting || _isConnected) {
+      return;
+    }
+
+    _autoReconnectTimer?.cancel();
+    _autoReconnectTimer = Timer(const Duration(seconds: 2), () async {
+      if (_manualDisconnectInProgress) return;
+      if (_selectedDevice == null || _isConnecting || _isConnected) return;
+      await connectToSavedDevice();
+    });
   }
 
   void _listenForNotifications(BluetoothCharacteristic characteristic) {
@@ -759,6 +785,8 @@ class BluetoothSensorService extends ChangeNotifier {
   }
 
   Future<void> close() async {
+    _autoReconnectTimer?.cancel();
+    _autoReconnectTimer = null;
     await _adapterSub?.cancel();
     _adapterSub = null;
     await _stopScan();

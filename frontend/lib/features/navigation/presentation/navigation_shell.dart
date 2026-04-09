@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:m2m/core/config/app_config.dart';
+import 'package:m2m/core/services/bluetooth_sensor_service.dart';
 import 'package:m2m/l10n/app_localizations.dart';
 
 import '../../games/domain/game_item.dart';
@@ -20,6 +21,102 @@ class NavigationShell extends StatefulWidget {
 
 class _NavigationShellState extends State<NavigationShell> {
   int _currentPageIndex = 0;
+  int? _lastNavigationButton;
+  DateTime _lastNavigationActionAt = DateTime.fromMillisecondsSinceEpoch(0);
+  final BluetoothSensorService _sensorService = BluetoothSensorService.instance;
+  final List<ScrollController> _pageScrollControllers = List<ScrollController>.generate(
+    4,
+    (_) => ScrollController(),
+  );
+  static const double _scrollStep = 260;
+  static const Duration _navigationDebounce = Duration(milliseconds: 260);
+
+  @override
+  void initState() {
+    super.initState();
+    _sensorService.addListener(_onSensorChanged);
+    _sensorService.ensureInitialized(autoConnect: true);
+  }
+
+  @override
+  void dispose() {
+    _sensorService.removeListener(_onSensorChanged);
+    for (final controller in _pageScrollControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  void _onSensorChanged() {
+    final button = _sensorService.activeButton;
+    if (button == null) {
+      // Release resets edge-trigger so same button can fire again next press.
+      _lastNavigationButton = null;
+      return;
+    }
+
+    if (button == _lastNavigationButton) {
+      return;
+    }
+
+    final now = DateTime.now();
+    if (now.difference(_lastNavigationActionAt) < _navigationDebounce) {
+      return;
+    }
+    _lastNavigationButton = button;
+    _lastNavigationActionAt = now;
+
+    switch (button) {
+      case 4:
+        // Next right screen (equivalent to swipe left).
+        _changeTabBy(1);
+        break;
+      case 10:
+        // Next left screen (equivalent to swipe right).
+        _changeTabBy(-1);
+        break;
+      case 1:
+        _scrollCurrentPage(up: true);
+        break;
+      case 7:
+        _scrollCurrentPage(up: false);
+        break;
+      case 8:
+        _goHome();
+        break;
+    }
+  }
+
+  void _changeTabBy(int delta) {
+    final next = (_currentPageIndex + delta).clamp(0, 3);
+    if (next == _currentPageIndex) return;
+    if (!mounted) return;
+    setState(() {
+      _currentPageIndex = next;
+    });
+  }
+
+  void _goHome() {
+    if (_currentPageIndex == 0 || !mounted) return;
+    setState(() {
+      _currentPageIndex = 0;
+    });
+  }
+
+  void _scrollCurrentPage({required bool up}) {
+    final controller = _pageScrollControllers[_currentPageIndex];
+    if (!controller.hasClients) return;
+    final offset = up ? -_scrollStep : _scrollStep;
+    final target = (controller.offset + offset).clamp(
+      0.0,
+      controller.position.maxScrollExtent,
+    );
+    controller.animateTo(
+      target,
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +127,22 @@ class _NavigationShellState extends State<NavigationShell> {
       body: IndexedStack(
         index: _currentPageIndex,
         children: <Widget>[
-          const HomePage(),
-          GamesPage(games: games),
-          const StatsPage(),
-          const SettingsPage(),
+          PrimaryScrollController(
+            controller: _pageScrollControllers[0],
+            child: const HomePage(),
+          ),
+          PrimaryScrollController(
+            controller: _pageScrollControllers[1],
+            child: GamesPage(games: games),
+          ),
+          PrimaryScrollController(
+            controller: _pageScrollControllers[2],
+            child: const StatsPage(),
+          ),
+          PrimaryScrollController(
+            controller: _pageScrollControllers[3],
+            child: const SettingsPage(),
+          ),
         ],
       ),
       bottomNavigationBar: NavigationBar(

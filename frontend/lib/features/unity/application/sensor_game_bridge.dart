@@ -298,9 +298,11 @@ class SensorGameBridge extends ChangeNotifier {
         actions['greenPepperTap'] = canTrigger && isThumb;
         break;
       case UnityGame.fishing:
-        // Reel: any FSR press → line down; release → up (replaces thumb button / W–S).
+        // Reel: only index/middle FSR press → line down; release → up.
         final reelDown =
-            isSensorConnected ? _anyFsrPressed() : (activeButton == 5);
+            isSensorConnected
+                ? _indexOrMiddlePressed()
+                : (activeButton == 2 || activeButton == 3);
         actions['verticalAxis'] = reelDown ? -1.0 : 1.0;
         actions['reelUp'] = !reelDown;
         actions['reelDown'] = reelDown;
@@ -364,14 +366,12 @@ class SensorGameBridge extends ChangeNotifier {
     return centered.clamp(-1.0, 1.0);
   }
 
-  bool _anyFsrPressed() {
+  bool _indexOrMiddlePressed() {
     final pins = _sensorService.pinReadings;
     final index = pins[_fsrIndexAdjusted] ?? 0;
     final middle = pins[_fsrMiddleAdjusted] ?? 0;
-    final thumb = pins[_fsrThumbRaw] ?? 0;
     return index >= _fsrAdjustedPressThreshold ||
-        middle >= _fsrAdjustedPressThreshold ||
-        thumb >= _fsrThumbRawPressThreshold;
+        middle >= _fsrAdjustedPressThreshold;
   }
 
   /// Joystick X from BLE (`33:xRaw`); falls back to [fallbackAxis] if not connected
