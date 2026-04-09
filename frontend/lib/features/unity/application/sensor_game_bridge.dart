@@ -267,35 +267,50 @@ class SensorGameBridge extends ChangeNotifier {
     switch (game) {
       case UnityGame.pizza:
         final mappedButton = activeButton != null &&
-                <int>{2, 3, 5}.contains(activeButton)
+                <int>{2, 3, 11, 12}.contains(activeButton)
             ? activeButton
             : null;
         final canTrigger =
             pressedEdge &&
             mappedButton != null &&
             _canTrigger('pizza', nowMs, preset.triggerCooldownMs);
-        final isIndex = mappedButton == 2;
-        final isMiddle = mappedButton == 3;
-        final isThumb = mappedButton == 5;
+
+        // Button mapping (ESP32 ladder buttons -> toppings)
+        // - pepperoni = button 2
+        // - olives = button 3
+        // - green peppers = button 11
+        // - sausage = button 12
+        final isPepperoni = mappedButton == 2;
+        final isOlives = mappedButton == 3;
+        final isGreenPepper = mappedButton == 11;
+        final isSausage = mappedButton == 12;
+
+        // Pizza Unity scripts support two contracts:
+        // - explicit edge flags (e.g. `pepperoniTap`, `ringTap`, `pinkyTap`)
+        // - generic `tap` + `lane` ("index", "middle", "ring", "pinky")
         final lane = mappedButton != null ? _laneForPizzaButton(mappedButton) : '';
         actions['tap'] = canTrigger;
         actions['lane'] = lane;
         // Keep level-style booleans true while held for polling-based Unity scripts.
-        actions['index'] = isIndex;
-        actions['middle'] = isMiddle;
-        actions['thumb'] = isThumb;
-        actions['olives'] = isIndex;
-        actions['pepperoni'] = isMiddle;
-        actions['sausage'] = false;
-        actions['greenPepper'] = isThumb;
+        actions['index'] = isOlives;
+        actions['middle'] = isPepperoni;
+        actions['ring'] = isSausage;
+        actions['pinky'] = isGreenPepper;
+        actions['thumb'] = false;
+        actions['olives'] = isOlives;
+        actions['pepperoni'] = isPepperoni;
+        actions['sausage'] = isSausage;
+        actions['greenPepper'] = isGreenPepper;
         // Also emit explicit edge-trigger variants for event-based handlers.
-        actions['indexTap'] = canTrigger && isIndex;
-        actions['middleTap'] = canTrigger && isMiddle;
-        actions['thumbTap'] = canTrigger && isThumb;
-        actions['olivesTap'] = canTrigger && isIndex;
-        actions['pepperoniTap'] = canTrigger && isMiddle;
-        actions['sausageTap'] = false;
-        actions['greenPepperTap'] = canTrigger && isThumb;
+        actions['indexTap'] = canTrigger && isOlives;
+        actions['middleTap'] = canTrigger && isPepperoni;
+        actions['ringTap'] = canTrigger && isSausage;
+        actions['pinkyTap'] = canTrigger && isGreenPepper;
+        actions['thumbTap'] = false;
+        actions['olivesTap'] = canTrigger && isOlives;
+        actions['pepperoniTap'] = canTrigger && isPepperoni;
+        actions['sausageTap'] = canTrigger && isSausage;
+        actions['greenPepperTap'] = canTrigger && isGreenPepper;
         break;
       case UnityGame.fishing:
         // Reel: only index/middle FSR press → line down; release → up.
@@ -335,11 +350,13 @@ class SensorGameBridge extends ChangeNotifier {
   String _laneForPizzaButton(int button) {
     switch (button) {
       case 2:
-        return 'index';
-      case 3:
         return 'middle';
-      case 5:
-        return 'thumb';
+      case 3:
+        return 'index';
+      case 11:
+        return 'pinky';
+      case 12:
+        return 'ring';
       default:
         return _nextPizzaLane();
     }
