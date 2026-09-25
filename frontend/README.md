@@ -19,14 +19,17 @@ flutter pub get
 
 ### ⚙️ Step 2: Create a `.env` File
 
-Inside the `frontend` folder, create a `.env` file with the following content:
+Inside the `frontend` folder, copy `.env.example` to `.env` and update the values for your client environment:
 
 ```env
+FLUTTER_APP_BASE_URL=
 FLUTTER_APP_EXP_IP=your_computer_ip_or_localhost
 FLUTTER_APP_EXP_PORT=6969
 FLUTTER_APP_BLE_SERVICE_UUID=6e400001-b5a3-f393-e0a9-e50e24dcca9e
 FLUTTER_APP_BLE_CHARACTERISTIC_UUID=6e400002-b5a3-f393-e0a9-e50e24dcca9e
 ```
+
+`FLUTTER_APP_BASE_URL` is optional. If you leave it empty, the app will build the backend URL from `FLUTTER_APP_EXP_IP` and `FLUTTER_APP_EXP_PORT`.
 
 #### 🧩 BLE Configuration
 

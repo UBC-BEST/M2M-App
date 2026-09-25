@@ -6,4 +6,6 @@ class StorageKeys {
   static const String useFaceId = 'useFaceID';
   static const String faceIdEmail = 'faceIdEmail';
   static const String faceIdPassword = 'faceIdPassword';
+  static const String bluetoothDeviceId = 'bluetoothDeviceId';
+  static const String bluetoothDeviceName = 'bluetoothDeviceName';
 }
