@@ -7,7 +7,11 @@ import {
 } from '../../../utils/database'
 import { ForbiddenError, NotFoundError } from '../../../utils/errors'
 import { generateRegistrationOptions } from '@simplewebauthn/server'
-import { WEBAUTHN_CHALLENGE_EXPIRY, WEBAUTHN_RP_NAME } from '../../../utils/env'
+import {
+  WEBAUTHN_CHALLENGE_EXPIRY,
+  WEBAUTHN_RP_ID,
+  WEBAUTHN_RP_NAME,
+} from '../../../utils/env'
 import { DateTime } from 'luxon'
 import ms from 'ms'
 
@@ -27,7 +31,7 @@ export const beginPasskeyRegister: RequestHandler = async (req, res) => {
 
   const options = await generateRegistrationOptions({
     rpName: WEBAUTHN_RP_NAME,
-    rpID: WEBAUTHN_RP_NAME,
+    rpID: WEBAUTHN_RP_ID,
     userName: user.email,
     userID: Buffer.from(user._id.toString()),
     userDisplayName: user.displayName ?? user.email,

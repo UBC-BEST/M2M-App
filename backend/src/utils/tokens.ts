@@ -142,7 +142,7 @@ export const generateLinkToken = async (email: string, type: LinkTokenType) => {
     token,
     createdAt,
     expiresAt,
-    type: 'login_link',
+    type,
   })
 
   return token
