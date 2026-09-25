@@ -1,4 +1,4 @@
-import supertest = require('supertest')
+import supertest from 'supertest'
 import { dbRefreshTokens, dbUsers, mongo } from '../src/utils/database'
 import { HOST, PORT } from '../src/utils/env'
 import { WithId } from 'mongodb'
