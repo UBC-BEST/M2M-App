@@ -11,7 +11,9 @@
     "outDir": "./dist",
     "baseUrl": ".",
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "noUncheckedSideEffectImports": false,
+    "types": ["node", "jest"]
   },
-  "include": ["src"]
+  "include": ["src", "tests"]
 }

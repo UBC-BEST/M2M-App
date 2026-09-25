@@ -19,5 +19,5 @@ export const getAccountInfo: RequestHandler = async (req, res) => {
     createdAt: user.createdAt,
   }
 
-  res.status(200).send(userResult)
+  res.status(200).json(userResult)
 }

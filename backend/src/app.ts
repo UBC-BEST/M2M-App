@@ -5,6 +5,7 @@ import { db } from './utils/database'
 import { DB_NAME, HOST, PORT } from './utils/env'
 import cookieParser from 'cookie-parser'
 import { accountRouter } from './routes/account'
+import { emailRouter } from './routes/email'
 
 // ----- SERVER SETUP -----
 
@@ -18,6 +19,7 @@ export const app = express()
 
 app.use('/auth', authRouter)
 app.use('/account', accountRouter)
+app.use('/email', emailRouter)
 app.get('/', (req, res) => {
   res.send('Network connection successful. Server running...')
 })

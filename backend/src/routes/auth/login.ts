@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express'
 import argon2 from 'argon2'
 import { dbUsers } from '../../utils/database'
-import { useRefreshToken, generateAccessToken } from '../../utils/tokens'
+import { generateAccessToken, useRefreshToken } from '../../utils/tokens'
 import { BadRequestError, UnauthorizedError } from '../../utils/errors'
 
 export const login: RequestHandler = async (req, res) => {

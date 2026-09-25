@@ -1,5 +1,5 @@
+import supertest from 'supertest'
 import { HOST, PORT } from '../src/utils/env'
-import supertest = require('supertest')
 import { WithId } from 'mongodb'
 import { UserDocument } from '../src/types/documents'
 import { dbRefreshTokens, dbUsers, mongo } from '../src/utils/database'
