@@ -13,7 +13,8 @@ This guide assumes that you are already in the [UBC-BEST](https://github.com/UBC
    2. Create a new project and inside make a cluster called `m2m`.
    3. Navigate to Security > Database Access and create an admin user (use password for authentication).
    4. Navigate to Database > Clusters and click the connect button. Then go to Drivers > Node and save the connection string, which we will need for the next step.
-6. Initialize environment variables.
+6. Set up a personal account with [Mailgun](https://www.mailgun.com/).
+7. Initialize environment variables.
    1. Create a file called `.env` in `../M2M-App/backend` and copy in the following template:
       ```
       HOST="http://localhost"
@@ -21,13 +22,26 @@ This guide assumes that you are already in the [UBC-BEST](https://github.com/UBC
       MONGODB_CONNECTION_URI=
       NODE_ENV="development"
       DB_NAME="m2m"
+
       ACCESS_TOKEN_SECRET=
       REFRESH_TOKEN_SECRET=
+      LINK_TOKEN_SECRET=
+
+      DISABLE_EMAILS=false
+      LINK_TOKEN_EXPIRY="7d"
+      EMAIL_SENDER_DOMAIN=
+      MAILGUN_API_SECRET=
+      CLIENT_URL="http://localhost:8080"
+
+      WEBAUTHN_RP_ID="localhost"
+      WEBAUTHN_RP_NAME="Muscle to Movement"
+      WEBAUTHN_CHALLENGE_EXPIRY="15m"
       ```
    2. For `MONGODB_CONNECTION_URI` use the connection string from above. Remember to replace the `<db_password>` part appropriately and surround the string with quotes (like with the `HOST` variable).
-   3. For `ACCESS_TOKEN_SECRET` and `REFRESH_TOKEN_SECRET` respectively, run\
+   3. For `ACCESS_TOKEN_SECRET`, `REFRESH_TOKEN_SECRET`, and `LINK_TOKEN_SECRET` respectively, run\
       `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`\
-      then copy the result into the env variable (remember to use quotes). Note that the two secrets should NOT be the same.
+      then copy the result into the env variable (remember to use quotes). Note that the three secrets should all be distinct.
+   4. For `EMAIL_SENDER_DOMAIN` and `MAILGUN_API_SECRET`, paste in the values from your Mailgun account. Alternatively, you may set `DISABLE_EMAILS` to `true`.
 7. Boot up the server by running `yarn start`, or alternatively `yarn dev` for live reloads (restart on code change). If everything was done correctly, the console output should be something like:
    
    ```
